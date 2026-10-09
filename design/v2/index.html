@@ -1188,21 +1188,57 @@
     }
   }
 
-  /* On touch screens the pinned-name choreography is dropped: the intro's
-     scroll-linked drift runs a step behind the phone's own compositor
-     scrolling, so the text shook under the finger. The hero simply scrolls;
-     the field keeps its parallax. The empty band the pin needed goes too. */
+  /* Touch screens get their own parallax. The desktop one (pinned name,
+     three stacked scroll animations per line, one composited `add`) runs a
+     step behind a phone's own scrolling, which read as the text shaking.
+     This one is one animation per element on transform and opacity only,
+     which the browser runs on the compositor in lockstep with the finger.
+
+     The hero peels apart instead of pinning: each line rises a little faster
+     than the page, the higher the faster (name, then the first paragraph,
+     then the second; the buttons just scroll), so the gaps between them only
+     ever widen and nothing can overlap. Each fades as it goes, done by the
+     time it has left the screen. Linear: scroll-linked motion tracks the
+     finger. */
   @supports (animation-timeline: scroll()) {
     @media (pointer: coarse) {
+      :root {
+        --peel-range: 420px; /* scroll distance the peel plays over */
+      }
+      .name:not(.dot-lens),
+      .hero-grid > .intro {
+        animation: hero-peel linear both;
+        animation-timeline: scroll(root);
+        animation-range: 0 var(--peel-range);
+        will-change: transform, opacity;
+      }
       .name:not(.dot-lens) {
         position: relative;
         top: auto;
+        --peel: 130px; /* extra rise over the range, on top of the scroll */
       }
-      .hero-fade {
-        animation: none;
+      .hero-grid > .intro {
+        --peel: 80px;
+      }
+      .hero-grid > .intro-2 {
+        --peel: 36px;
       }
       .hero-actions {
+        animation: none;
         margin-bottom: 64px;
+      }
+      /* Opacity holds solid for the first third (the rise doesn't: the
+         35% stop is just the straight line's own value there), so the text
+         is still fully readable for the first stretch of scroll. */
+      @keyframes hero-peel {
+        35% {
+          transform: translateY(calc(var(--peel) * -0.35));
+          opacity: 1;
+        }
+        to {
+          transform: translateY(calc(var(--peel) * -1));
+          opacity: 0;
+        }
       }
     }
   }
