@@ -1153,6 +1153,59 @@
       transition-duration: 0s;
     }
   }
+
+  /* Changing page hands the bar over instead of teleporting it: the nav is
+     kept across the swap (page-swap.js), and while data-dir is set the bar
+     leaving pulls away toward the link being opened and the arriving one
+     grows out from that side -- one bar travelling, in either direction. */
+  .nav-links[data-dir="right"] a:not([aria-current])::after,
+  .nav-links[data-dir="left"] a[aria-current]::after {
+    transform-origin: right;
+  }
+
+  /* Press feedback for the hero buttons: the face dips and darkens a step
+     on the way down (fast, 100ms) and settles back on release with the
+     usual 160ms. View Work's arrow leans the way it's about to take you;
+     the GitHub/LinkedIn marks give a little under the thumb and spring back
+     on the slower icon curve. */
+  .btn-flat:active {
+    transform: scale(0.96);
+    background-color: color-mix(in srgb, var(--cobalt) 82%, #000);
+    transition-duration: 0.1s;
+  }
+  .btn-cta:active .icon {
+    transform: translate(3px, -3px);
+    transition-duration: 0.1s;
+  }
+  .btn-social:active .icon {
+    transform: scale(0.86);
+    transition-duration: 0.1s;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html:not(.force-motion) .btn-flat:active,
+    html:not(.force-motion) .btn-flat:active .icon {
+      transform: none;
+    }
+  }
+
+  /* On touch screens the pinned-name choreography is dropped: the intro's
+     scroll-linked drift runs a step behind the phone's own compositor
+     scrolling, so the text shook under the finger. The hero simply scrolls;
+     the field keeps its parallax. The empty band the pin needed goes too. */
+  @supports (animation-timeline: scroll()) {
+    @media (pointer: coarse) {
+      .name:not(.dot-lens) {
+        position: relative;
+        top: auto;
+      }
+      .hero-fade {
+        animation: none;
+      }
+      .hero-actions {
+        margin-bottom: 64px;
+      }
+    }
+  }
 </style>
 
 <svg style="display: none" aria-hidden="true">
@@ -2109,6 +2162,8 @@
       var CLEARANCE = -48; // gap between the field's end and the Experience heading
       var GROW = 1.2; // push it past that line; 1 ends it right at the heading
       var SHRINK = 150; // flat trim off the computed height
+      var TOUCH_REACH = 18; // on touch screens, how far into Experience's top
+      // padding it runs (the heading itself sits a little further down)
       var CELL = 18; // matches twin-field.js's own CELL; rows there no longer
       // overscan, so the height handed to it must land exactly on a cell
       // boundary or the last row is cut off mid-tile.
@@ -2127,6 +2182,17 @@
           320,
           (expTop - CLEARANCE - FIELD_TOP) * GROW - SHRINK,
         );
+        // Touch screens drop the pinned hero and its long empty band (see the
+        // pointer: coarse block in the styles), so the tuning above would end
+        // the field above the buttons; there it runs down to just short of
+        // the Experience heading instead.
+        // Measured with offsetTop, which is in the page's own (unzoomed)
+        // pixels like the height being set, unlike getBoundingClientRect.
+        if (matchMedia("(pointer: coarse)").matches) {
+          var t = 0;
+          for (var n = exp; n; n = n.offsetParent) t += n.offsetTop;
+          raw = t - FIELD_TOP + TOUCH_REACH;
+        }
         cv.style.height = Math.round(raw / CELL) * CELL + "px";
       }
 

@@ -99,8 +99,39 @@
   var EXIT_MS = 140;
   var MOVERS = "main, footer, .field";
 
+  // The bar under Home/Work moves to the page being opened right away, so it
+  // travels while the content swaps. Which way it travels comes from the
+  // links' order; data-dir is cleared once the bar has arrived.
+  var BAR_MS = 450;
+  var dirTimer = 0;
+  function fileOf(href) {
+    return new URL(href, location.href).pathname.split("/").pop() || "index.html";
+  }
+  function moveBar(target) {
+    var list = document.querySelector(".nav-links");
+    if (!list) return;
+    var links = list.querySelectorAll("a[href]");
+    var from = -1,
+      to = -1;
+    for (var i = 0; i < links.length; i++) {
+      if (links[i].hasAttribute("aria-current")) from = i;
+      if (fileOf(links[i].getAttribute("href")) === target) to = i;
+    }
+    if (to < 0 || from === to) return;
+    list.setAttribute("data-dir", to > from ? "right" : "left");
+    for (var j = 0; j < links.length; j++) {
+      if (j === to) links[j].setAttribute("aria-current", "page");
+      else links[j].removeAttribute("aria-current");
+    }
+    clearTimeout(dirTimer);
+    dirTimer = setTimeout(function () {
+      list.removeAttribute("data-dir");
+    }, BAR_MS);
+  }
+
   function swap(url, push) {
     var mine = ++token;
+    moveBar(fileOf(url));
 
     var leaving = document.querySelectorAll(MOVERS);
     for (var i = 0; i < leaving.length; i++) leaving[i].classList.add("is-leaving");
@@ -126,7 +157,28 @@
         var newStyle = doc.getElementById("page-style");
         if (style && newStyle) style.textContent = newStyle.textContent;
         if (push) history.pushState({ swap: true }, "", url);
+        // Keep the nav that's on screen (its bar is mid-flight) but give it
+        // the incoming page's attributes, so each page's own hooks hold.
+        var keptNav = document.querySelector(".nav-fixed");
         document.body.innerHTML = doc.body.innerHTML;
+        var newNav = document.querySelector(".nav-fixed");
+        if (keptNav && newNav) {
+          var oldLinks = keptNav.querySelectorAll(".nav-links a");
+          var newLinks = newNav.querySelectorAll(".nav-links a");
+          if (oldLinks.length === newLinks.length) {
+            for (var n = 0; n < newLinks.length; n++) {
+              var a = oldLinks[n],
+                b = newLinks[n];
+              for (var r = a.attributes.length - 1; r >= 0; r--) {
+                var nm = a.attributes[r].name;
+                if (!b.hasAttribute(nm)) a.removeAttribute(nm);
+              }
+              for (var w = 0; w < b.attributes.length; w++)
+                a.setAttribute(b.attributes[w].name, b.attributes[w].value);
+            }
+            newNav.replaceWith(keptNav);
+          }
+        }
         // Start the new page one step down and transparent, then release it
         // on the next frame so it rises in. Set before anything paints, so
         // there's no flash of it at full opacity first.

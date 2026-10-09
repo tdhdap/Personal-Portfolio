@@ -582,6 +582,15 @@
       transition-duration: 0s;
     }
   }
+
+  /* Changing page hands the bar over instead of teleporting it: the nav is
+     kept across the swap (page-swap.js), and while data-dir is set the bar
+     leaving pulls away toward the link being opened and the arriving one
+     grows out from that side -- one bar travelling, in either direction. */
+  .nav-links[data-dir="right"] a:not([aria-current])::after,
+  .nav-links[data-dir="left"] a[aria-current]::after {
+    transform-origin: right;
+  }
 </style>
 
 <svg style="display: none" aria-hidden="true">
