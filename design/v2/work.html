@@ -591,6 +591,71 @@
   .nav-links[data-dir="left"] a[aria-current]::after {
     transform-origin: right;
   }
+
+  /* ---------- contact: the same sign-off as the home page ----------
+     The last project's hairline plays the part of the home page's rule, so
+     the same section spacing follows it. */
+  .contact {
+    padding-top: clamp(72px, 8vw, 116px);
+  }
+  .sec-title {
+    font-size: clamp(24px, 3.2vw, 38px);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    margin-bottom: clamp(30px, 3.6vw, 46px);
+  }
+  .mail {
+    font-size: clamp(18px, 2.3vw, 26px);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    display: inline-block;
+    padding-bottom: 8px; /* 5px gap + the 3px line */
+    position: relative;
+  }
+  /* Grey resting line and the cobalt bar over it, as on the Live/Code links. */
+  .mail::before,
+  .mail::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+  }
+  .mail::before {
+    background: var(--line-2);
+  }
+  .mail::after {
+    background: var(--cobalt);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.16s var(--ease-ui);
+  }
+  .mail.is-ringed::after {
+    transform: scaleX(1);
+  }
+  .note {
+    margin-top: 22px;
+    color: var(--fg-2);
+    font-size: 14.5px;
+    line-height: 1.72;
+    max-width: 50ch;
+  }
+  @media (hover: none), (pointer: coarse) {
+    .mail {
+      padding-top: 12px;
+      margin-top: -12px;
+    }
+    .mail:active::after {
+      transform: scaleX(1);
+      transition-duration: 0s;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html:not(.force-motion) .mail::after {
+      transition: none;
+    }
+  }
 </style>
 
 <svg style="display: none" aria-hidden="true">
@@ -832,6 +897,14 @@
       </div>
     </article>
   </div>
+
+  <section class="contact" id="contact">
+    <h2 class="sec-title magnetic">Say hello</h2>
+    <div>
+      <a class="mail" href="mailto:tharunsden@gmail.com">tharunsden@gmail.com</a>
+      <p class="note">Open to new-grad ML roles.</p>
+    </div>
+  </section>
 </main>
 
 
@@ -926,7 +999,8 @@
         // Live/Code links get the same pair as the home page: the white ring
         // and their blue bar, both on this one check.
         var lk =
-          (e.target && e.target.closest && e.target.closest(".lk")) || null;
+          (e.target && e.target.closest && e.target.closest(".lk, .mail")) ||
+          null;
 
         // The row check is what keeps the field from pulling; the dot's own
         // growth uses the per-link check below it, so it swells on the word
