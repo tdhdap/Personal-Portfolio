@@ -1,0 +1,2146 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#07070a" />
+<meta name="color-scheme" content="dark" />
+<title>Tharun Dendukuri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+  rel="stylesheet"
+/>
+<script>
+  document.documentElement.classList.add("js");
+  // Motion is ON by default while this is a design preview, so the CSS
+  // reduced-motion block is disarmed unless ?motion=off asks for it back.
+  // Runs before first paint. See the note at the bottom script.
+  if (location.search.indexOf("motion=off") === -1)
+    document.documentElement.classList.add("force-motion");
+</script>
+<script src="./page-swap.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.css"
+/>
+<script
+  src="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js"
+  defer
+></script>
+<script src="./smooth-scroll.js" defer></script>
+<style id="page-style">
+  /* Lenis eases the scroll itself; native smooth scrolling on top of it
+     makes every programmatic jump double-ease. */
+  html.lenis {
+    scroll-behavior: auto;
+  }
+  /* Opts into cross-document view transitions (Chromium). Without this the
+     browser tears the page down and shows a blank frame before the next
+     page's CSS applies, and the OS pointer flashes in that gap since nothing
+     is left on screen enforcing cursor:none. With it, the old page's frame
+     stays rendered (cursor hidden) through the swap instead of going blank. */
+  @view-transition {
+    navigation: auto;
+  }
+  /* Registered as a <length> so its computed value resolves to px, which the
+     field-sizing script reads to undo the layout shift it introduces. */
+  @property --pin-extend {
+    syntax: "<length>";
+    inherits: true;
+    initial-value: 0px;
+  }
+  :root {
+    --bg: #07070a;
+    --fg: #f2f2f4;
+    --fg-2: #9a9aa4;
+    --fg-3: #61616b;
+    --line: rgba(255, 255, 255, 0.1);
+    --line-2: rgba(255, 255, 255, 0.18);
+
+    --cobalt: #1b4dff; /* fills and particles */
+    --cobalt-hi: #3b66ff; /* fill hover */
+    --navy: #101b4d; /* the darker block */
+    --link: #5c86ff; /* small text: same family, readable on black */
+    --wash: rgba(27, 77, 255, 0.16);
+
+    --sans: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-ui: cubic-bezier(0.23, 1, 0.32, 1);
+    --parallax-range: 100vh; /* scroll distance both hero layers animate over */
+    --parallax-depth: 40vh; /* how far each layer departs from 1x across it */
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --pin-extend: 0px; /* hero padding borrowed from Experience; set in @supports */
+    --name-lift: 28px; /* name sits this far above its layout slot, from load */
+    --shell: 1280px;
+    --gut: clamp(20px, 4vw, 56px);
+  }
+
+  * {
+    box-sizing: border-box;
+    border-radius: 0;
+    cursor: none;
+  }
+
+  /* A small filled dot everywhere, opening into a hollow ring over a button
+     face. The border is always present (transparent when it's a dot) so
+     box-sizing:border-box keeps the outer size stable across the swap and
+     nothing jumps when the border color/width animates in. Positioned by its
+     centre (the -50% pair in the transform), so it can resize without
+     drifting. */
+  .cursor-dot {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid transparent;
+    pointer-events: none;
+    z-index: 3; /* above all page content */
+    opacity: 0;
+    transform: translate(-1000px, -1000px);
+    transition:
+      opacity 0.15s ease,
+      width 0.22s var(--ease-ui),
+      height 0.22s var(--ease-ui),
+      background-color 0.18s var(--ease-ui),
+      border-color 0.18s var(--ease-ui),
+      border-width 0.22s var(--ease-ui);
+  }
+  /* Over anything worth clicking the dot grows. It stays a filled white disc:
+     the signal is its size, and what the lens below does to the text inside
+     it -- not an outline. */
+  .cursor-dot.is-ring {
+    width: 56px;
+    height: 56px;
+    background: #fff;
+    border-width: 0;
+  }
+  @media (hover: none) and (pointer: coarse) {
+    * {
+      cursor: auto;
+    }
+    .cursor-dot {
+      display: none;
+    }
+  }
+  /* The whole page renders at 90% of its written size, which is how it was
+     drawn: the type, spacing and images were all judged with the browser at
+     90% zoom, so this is what 100% zoom should look like. Everything scales
+     together -- there is no second set of sizes to keep in step. The one
+     thing that needs to know about it is the cursor script, which positions
+     the dot from pointer coordinates: those arrive unscaled, so it divides by
+     this number. */
+  :root {
+    --page-zoom: 0.9;
+    /* The window's real width and height, in the page's own scaled units:
+       viewport units do not know about the zoom above, so anything measured
+       against the window has to be divided by it or it falls short. */
+    --vw: calc(100vw / var(--page-zoom));
+    --vh: calc(100vh / var(--page-zoom));
+  }
+  html {
+    zoom: var(--page-zoom);
+    background: var(--bg);
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    padding-inline: var(--gut);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: -0.04em;
+  }
+  p {
+    margin: 0;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .shell {
+    max-width: var(--shell);
+    margin-inline: auto;
+  }
+
+  ::selection {
+    background: var(--wash);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid var(--link);
+    outline-offset: 3px;
+  }
+  /* The scrollbar is the one surface `cursor:none` cannot reach, so the native
+     arrow reappears over that strip on the right. Hiding it keeps the custom
+     cursor unbroken; wheel, trackpad and keyboard scrolling are unaffected. */
+  html {
+    scrollbar-width: none;
+  }
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  .icon {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ---------- twin field ---------- */
+  .field {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--vw);
+    height: 620px;
+    z-index: 0;
+    pointer-events: none;
+    display: block;
+  }
+  /* Deliberately NO z-index here. Positioned-but-auto means main does not open
+     a stacking context, so .dot-lens inside it can still paint above the cursor
+     dot. Give main a z-index and the lens gets trapped underneath. It still
+     covers the field canvas: both land in the same paint group, and the canvas
+     comes first in the DOM. */
+  main,
+  footer {
+    position: relative;
+  }
+
+  /* Page transition, driven by page-swap.js: the old page lifts a step and
+     fades, the new one rises into its place. Entering is the longer half
+     (260ms vs 140ms) because that's the part being watched; both use the
+     site's strong ease-out, since this is an exit and an entrance. The field
+     needs its scroll animation switched off to fade at all — an animation
+     beats a transition on the same property. */
+  main,
+  footer,
+  .field {
+    transition:
+      opacity 260ms var(--ease-ui),
+      translate 260ms var(--ease-ui);
+  }
+  main.is-leaving,
+  footer.is-leaving,
+  .field.is-leaving {
+    opacity: 0;
+    translate: 0 -8px;
+    transition-duration: 140ms;
+  }
+  .field.is-leaving,
+  .field.is-entering {
+    animation: none;
+  }
+  main.is-entering,
+  footer.is-entering,
+  .field.is-entering {
+    opacity: 0;
+    translate: 0 10px;
+    transition: none;
+  }
+
+  /* ---------- nav ----------
+     No bar, no wordmark: just the two links floating over the field in the
+     top-right, so the canvas can run edge to edge and top to bottom. z-index 2
+     keeps them clear of main as it scrolls underneath. */
+  .nav-fixed {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 2;
+    padding: 26px var(--gut);
+    pointer-events: none; /* only the links themselves are clickable */
+  }
+  .nav-fixed .nav-links {
+    pointer-events: auto;
+  }
+  .nav-links {
+    display: flex;
+    gap: 30px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  /* The bar is a pseudo-element rather than a border so showing it costs no
+     layout shift, and it scales on transform instead of animating width. */
+  /* Both links stay white at all times; the bar alone carries hover and active
+     state, so nothing dims against the animated field behind them. */
+  .nav-links a {
+    position: relative;
+    display: block;
+    padding-block: 6px;
+    color: var(--fg);
+  }
+  /* Invisible hit area much larger than the visible text, since the ring's
+     activation (and the field's dot-hidden exception) both key off whether
+     the pointer is within .nav-fixed at all. No neighbours up here in the
+     corner to worry about overlapping. */
+  .nav-links a::before {
+    content: "";
+    position: absolute;
+    inset: -45px -35px;
+  }
+  .nav-links a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: var(--cobalt);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s var(--ease-ui);
+  }
+  .nav-links a[aria-current="page"]::after {
+    transform: scaleX(1);
+  }
+  /* Driven by JS (a tighter proximity check than the ring's own broad hit
+     zone), not :hover: with the enlarged ::before hit area, :hover would
+     fire the instant the ring itself activates instead of only once it's
+     actually closed in on this link. */
+  .nav-links a.is-near::after {
+    transform: scaleX(1);
+  }
+
+  /* ---------- hero: asymmetric, and quiet ---------- */
+  /* Absorbs the 69px the removed nav bar used to contribute, so the hero sits
+     where it did rather than jumping to the top edge. */
+  .hero {
+    padding-top: clamp(125px, 13vw, 165px);
+    padding-bottom: clamp(220px, 26vw, 360px);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(14px, 1.8vw, 24px);
+  }
+  .name {
+    font-size: clamp(34px, 6.2vw, 84px);
+    font-weight: 600;
+    letter-spacing: -0.045em;
+    /* Optical: pulls the T's side bearing back onto the text edge. In em so
+       it scales with the type (5px at full size, ~2px on a phone). */
+    margin-left: -0.06em;
+  }
+  /* Visual offset only, so the intro keeps its place in the flow. Excludes
+     the lens clone, which already moves with its parent. */
+  .name:not(.dot-lens) {
+    translate: 0 calc(var(--name-lift) * -1);
+  }
+  /* The name's sticky pin opens a stacking context, which would trap its lens
+     clone (z-index 4) under the cursor dot (z-index 3). Lifting the whole name
+     to 4 keeps the lens on top; inside the dot's circle the blue clone covers
+     the white glyphs exactly, so it reads the same as before. */
+  @media (hover: hover) and (pointer: fine) {
+    .name {
+      position: relative;
+      z-index: 4;
+    }
+  }
+  .role {
+    margin-top: clamp(20px, 2.4vw, 30px);
+    font-size: clamp(13.5px, 1.3vw, 16px);
+    font-weight: 500;
+    color: var(--fg-2);
+    letter-spacing: -0.01em;
+  }
+  .intro {
+    color: rgba(242, 242, 244, 0.82);
+    font-size: 16.5px;
+    line-height: 1.72;
+    max-width: 62ch;
+  }
+  .intro strong {
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  /* paired social links; wraps rather than squeezing on narrow screens */
+  .hero-actions {
+    margin-top: clamp(24px, 3vw, 36px);
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    /* Own stacking context, so the buttons' negative-z hit zones (below)
+       stay inside this row instead of dropping under the page background.
+*/
+    isolation: isolate;
+  }
+  .btn-flat {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    height: 42px;
+    padding-inline: 18px;
+    background: var(--cobalt);
+    color: #fff;
+    font-size: 13.5px;
+    font-weight: 500;
+    transition:
+      transform 0.16s var(--ease-ui),
+      background-color 0.12s linear,
+      color 0.12s linear;
+  }
+  /* Driven by JS in the same branch that puts the cursor into its ring
+     state (not :hover), so the invert lands on the exact same frame the
+     ring closes in rather than on its own separate trigger. Kept as a
+     fast plain crossfade, not a directional wipe: that read as slow and
+     disconnected from the ring when tried before. */
+  /* The button itself no longer flips. The cursor is what inverts it now:
+     its copy of the button is black with white text, inside the disc only. */
+  .btn-flat.is-active {
+    background: var(--cobalt);
+    color: #fff;
+  }
+  /* Invisible hit area larger than the button itself, so hover fires slightly
+     before the cursor arrives. Events on a pseudo-element count as events on
+     its owner, so :hover and the [data-field-pull] lookup both still resolve
+     to the <a>. The 6px sides are exactly half the 12px flex gap, so the two
+     buttons' zones tile the space between them without overlapping and
+     stealing each other's hover. */
+  /* The hit zones reach 50px out but the buttons sit only 20px apart, so
+     neighbouring zones cover each other's faces. At the default z they'd
+     stack in DOM order and LinkedIn's zone would swallow clicks on GitHub's
+     face. Behind every face (z-index -1), a click on a button's own face
+     always lands on that button; the zone still catches the empty space. */
+  .btn-flat::after {
+    content: "";
+    position: absolute;
+    inset: -50px -50px;
+    z-index: -1;
+  }
+  .btn-flat:active {
+    transform: scale(0.97);
+  }
+  .btn-flat .icon {
+    width: 15px;
+    height: 15px;
+    transition: transform 0.28s var(--ease);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-flat:hover .icon {
+      transform: translate(2px, -2px);
+    }
+  }
+  /* Brand marks lead the label rather than trailing it, so they skip the
+     arrow nudge above. Must stay after that rule: equal specificity. */
+  .btn-social .icon {
+    width: 16px;
+    height: 16px;
+  }
+  .btn-social:hover .icon {
+    transform: none;
+  }
+  .btn-cta:hover .icon {
+    transform: none;
+  }
+  .btn-cta {
+    font-size: 16.5px;
+    font-weight: 500;
+  }
+  .btn-cta .icon {
+    width: 20px;
+    height: 20px;
+  }
+  /* Icon-only variant: square instead of the text button's padded pill, the
+     icon sized up since it is the button's entire content. */
+  .btn-icon-only {
+    width: 42px;
+    padding-inline: 0;
+    justify-content: center;
+  }
+  .btn-icon-only .icon {
+    width: 22px;
+    height: 22px;
+  }
+  /* LinkedIn's official bug, from a PNG with a transparent background and
+     transparent "in". Used as a mask over currentColor rather than as an
+     image, so it takes the button's colour (white on blue, blue when the
+     button inverts) instead of the file's black. */
+  .icon-li {
+    display: inline-block;
+    background-color: currentColor;
+    -webkit-mask: url("./assets/linkedin-bug.png") center / contain no-repeat;
+    mask: url("./assets/linkedin-bug.png") center / contain no-repeat;
+  }
+
+  /* ---------- sections ---------- */
+  /* Experience overrides this below (it lends part of its top padding to the
+     hero so the pinned name releases closer), so this value is what sets the
+     gap for Toolkit and Say hello. Kept near Experience's effective spacing
+     so the three sections sit at a consistent rhythm. */
+  .block {
+    padding-top: clamp(72px, 8vw, 116px);
+  }
+  .sec-title {
+    font-size: clamp(24px, 3.2vw, 38px);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    margin-bottom: clamp(30px, 3.6vw, 46px);
+  }
+
+  /* experience: year-anchored ledger */
+  .ledger {
+    border-top: 1px solid var(--line);
+  }
+  .xp {
+    display: grid;
+    grid-template-columns: clamp(96px, 10vw, 124px) minmax(0, 1fr);
+    gap: clamp(20px, 3.6vw, 48px);
+    align-items: start;
+    padding-block: clamp(34px, 4.2vw, 50px);
+    border-bottom: 1px solid var(--line);
+    position: relative; /* anchors the bar below */
+  }
+  @media (max-width: 760px) {
+    .xp {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+  }
+  .xp-year {
+    font-size: clamp(21px, 2vw, 27px);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    color: var(--fg);
+  }
+  .xp-span {
+    margin-top: 8px;
+    font-family: var(--mono);
+    font-size: 13.5px;
+    letter-spacing: 0.08em;
+    color: var(--fg);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .xp-role {
+    font-size: clamp(19px, 1.9vw, 24px);
+    font-weight: 600;
+    letter-spacing: -0.022em;
+  }
+  .xp-org {
+    margin-top: 8px;
+    font-size: 17px;
+    color: var(--fg-2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .xp-org .place {
+    font-family: var(--mono);
+    font-size: 13.5px;
+    color: var(--fg-3);
+  }
+  .xp-org a {
+    color: var(--fg-3);
+    display: inline-flex;
+  }
+  .xp-body {
+    margin-top: 13px;
+    color: var(--fg-2);
+    font-size: 17.5px;
+    line-height: 1.75;
+    max-width: 64ch;
+  }
+  /* Live/Code links, same treatment as the Work page's project links so the
+     two sections read as one system. */
+  .xp-links {
+    margin-top: 18px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .lk {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    /* Set like the role headings above them -- same weight, same tight
+       tracking, no uppercase -- rather than as small tracked-out labels. */
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    color: var(--fg);
+    padding-bottom: 7px; /* 4px gap + the 3px line */
+    position: relative; /* anchors the blue bar, shared with .mail below */
+  }
+  .lk .icon {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* toolkit */
+  .kit {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(16px, 2vw, 24px);
+    max-width: 76ch;
+  }
+  .kit-row {
+    display: grid;
+    grid-template-columns: 195px minmax(0, 1fr); /* fits "Frameworks & Libraries" on one line */
+    gap: clamp(16px, 2.6vw, 32px);
+    align-items: baseline;
+  }
+  @media (max-width: 640px) {
+    .kit-row {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+  }
+  .kit-k {
+    font-size: 16px;
+    color: var(--fg-3);
+  }
+  .kit-v {
+    font-size: 17.5px;
+    color: var(--fg);
+    line-height: 1.72;
+  }
+  .kit-v i {
+    font-style: normal;
+    color: var(--fg-3);
+    padding-inline: 9px;
+  }
+
+  /* A single hairline between Toolkit and Certifications, sitting exactly
+     halfway: its own margin above matches the section padding that follows it
+     below, so the gap reads the same on both sides. */
+  .sec-rule {
+    border: 0;
+    border-top: 1px solid var(--line);
+    margin: clamp(72px, 8vw, 116px) 0 0;
+  }
+
+  /* certifications: four across, two rows. The cards are one size and sit on
+     a plain grid -- no offsets, no tilt, nothing placed by hand -- so adding
+     or removing one changes nothing but the number of cells. */
+  #certs {
+    --tile-gap: clamp(20px, 2.4vw, 38px);
+    --cert-surface: #0c0c11; /* one step up from --bg, so a tile reads as a surface */
+  }
+  .cert-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(44px, 4.4vw, 64px) var(--tile-gap);
+    /* Stretch, so every card in a row is as tall as the tallest: with the
+       Verify link pushed to the bottom of its card, the links then line up
+       across the row however many lines a name runs to. */
+    align-items: stretch;
+    /* Kept to the middle of the column: four full-width cards would be larger
+       than the certificates want to be read at. */
+    max-width: 1040px;
+  }
+  /* Each tile spans four rows of the grid and adopts them (subgrid), so the
+     date line, the name and Verify sit on shared tracks: a date or name that
+     wraps to two lines moves its whole row, not just its own card. */
+  .cert-tile {
+    display: grid;
+    grid-row: span 4;
+    grid-template-rows: subgrid;
+    row-gap: 12px;
+    justify-items: start;
+    align-content: start;
+  }
+  .cert-tile:hover {
+    z-index: 2;
+  }
+  /* The proof itself, on a surface one step up from the page and outlined in
+     the same hairline the rest of the site rules with. Contained, never
+     cropped: a certificate cut off is a certificate ruined. */
+  .cert-shot {
+    position: relative; /* the image is taken out of flow below, so the box
+                           keeps the ratio instead of the certificate setting
+                           it: tiles of different certificates stay level */
+    width: 100%;
+    aspect-ratio: 1.414 / 1;
+    background: var(--cert-surface);
+    border: 1px solid var(--line);
+    overflow: clip;
+    transition: border-color 200ms var(--ease-ui);
+  }
+  .cert-tile:hover .cert-shot {
+    border-color: var(--line-2);
+  }
+  .cert-shot img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .cert-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+  }
+  .cert-name {
+    font-size: clamp(14px, 1.05vw, 16px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+  /* Same small-link language as the Experience section's LIVE / CODE links:
+     uppercase, tracked out, sitting on a rule. The cobalt bar and the white
+     ring are its hover, both driven from the cursor script. */
+  .cert-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto; /* sits on the card's bottom edge, level across the row */
+    padding-top: 2px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fg);
+    padding-bottom: 6px; /* 3px gap + the 3px line */
+    position: relative; /* anchors the blue bar, as on the email and Live/Code */
+  }
+  .cert-more .icon {
+    width: 13px;
+    height: 13px;
+  }
+  @media (max-width: 900px) {
+    .cert-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  /* On a phone, eight full-width cards is eight screens of scrolling. Each
+     becomes a row instead: the certificate as a thumbnail, its details
+     beside it. */
+  @media (max-width: 520px) {
+    .cert-grid {
+      grid-template-columns: 1fr;
+      row-gap: 26px;
+    }
+    .cert-tile {
+      grid-row: auto;
+      grid-template-rows: none;
+      grid-template-columns: 128px minmax(0, 1fr);
+      grid-template-areas:
+        "shot meta"
+        "shot name"
+        "shot more";
+      column-gap: 16px;
+      row-gap: 6px;
+    }
+    .cert-shot {
+      grid-area: shot;
+      align-self: start;
+    }
+    .cert-meta {
+      grid-area: meta;
+    }
+    .cert-name {
+      grid-area: name;
+    }
+    .cert-more {
+      grid-area: more;
+    }
+  }
+
+  /* contact */
+  .mail {
+    font-size: clamp(18px, 2.3vw, 26px);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    display: inline-block;
+    padding-bottom: 8px; /* 5px gap + the 3px line */
+    position: relative;
+  }
+  /* A cobalt bar drawn over the grey underline, scaling in from the left:
+     the same bar, thickness, curve and duration as the Home/Work links.
+     Shared by the email and the Live/Code links; neither changes text
+     colour, the white ring and this bar are the whole hover. */
+  /* The resting grey line: the same box as the blue bar drawn over it (a
+     border would be rounded to whole device pixels under the page zoom and
+     come out thinner than the bar), so hover changes only its colour. */
+  .mail::before,
+  .lk::before,
+  .cert-more::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: var(--line-2);
+  }
+  .mail::after,
+  .lk::after,
+  .cert-more::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: var(--cobalt);
+    transform: scaleX(0);
+    transform-origin: left;
+    /* Quick, because the other half of this hover -- the text inverting
+       inside the cursor -- is instant. At the nav's 0.4s the bar arrived
+       visibly after the text, which read as the two being unrelated. */
+    transition: transform 0.16s var(--ease-ui);
+  }
+  /* Set by the cursor script on the exact trigger that opens the ring, not
+     :hover, so the bar and the ring can't fire at different moments. */
+  .mail.is-ringed::after,
+  .lk.is-ringed::after,
+  .cert-more.is-ringed::after {
+    transform: scaleX(1);
+  }
+  .note {
+    margin-top: 22px;
+    color: var(--fg-2);
+    font-size: 14.5px;
+    line-height: 1.72;
+    max-width: 50ch;
+  }
+  /* No footer: the page simply ends a short breath after the last section. */
+  main {
+    padding-bottom: clamp(64px, 7vw, 96px);
+  }
+
+  /* Sits above the dot (z-index 3), so within the clip circle you read blue
+     glyphs instead of the flat white disc. */
+  /* One layer for every copy the cursor draws, above the dot and out of the
+     way of the page's own stacking. */
+  .lens-host {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .dot-lens {
+    pointer-events: none;
+  }
+  /* A nav link's bar is drawn by a rule that reaches it through .nav-links,
+     which the copy is no longer inside: it carries .nav-link instead, and this
+     redraws the same bar on it. */
+  .dot-lens.nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: #000;
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  .dot-lens.nav-link.is-near::after,
+  .dot-lens.nav-link[aria-current="page"]::after {
+    transform: scaleX(1);
+  }
+  /* The resting grey line is a faint white, which vanishes on the white dot;
+     inside it, it reads as a faint black instead. */
+  .dot-lens.mail::before,
+  .dot-lens.lk::before,
+  .dot-lens.cert-more::before {
+    background: rgba(0, 0, 0, 0.4) !important;
+  }
+  /* Every bar reads black inside the dot, the same as the text. Scoped to the
+     links that have one: .btn-flat's ::after is its invisible hit zone, and
+     colouring that would paint a slab behind the button. */
+  .dot-lens.mail::after,
+  .dot-lens.lk::after,
+  .dot-lens.cert-more::after {
+    background: #000 !important;
+  }
+  /* Text under the dot goes black -- the dot is white, so this reads as the
+     text inverting inside it. */
+  .dot-lens,
+  .dot-lens * {
+    color: #000 !important;
+  }
+  .dot-lens {
+    background: none !important;
+  }
+  /* Inside the dot everything cobalt reads black: a button's face, and the
+     bar under a link. The button is still a swap rather than an inversion --
+     hovering turns it white with cobalt text, and inside the dot it goes to
+     black with white text. */
+  .btn-flat.dot-lens {
+    background: #000 !important;
+  }
+  .btn-flat.dot-lens,
+  .btn-flat.dot-lens * {
+    color: #fff !important;
+  }
+  .mail .dot-lens::after,
+  .lk .dot-lens::after,
+  .cert-more .dot-lens::after,
+  .nav-links a .dot-lens::after {
+    background: #000 !important;
+  }
+
+  /* Hero scroll: the name holds still while the field trails away behind it
+     (0.6x, dissolving before Experience), then releases near the end.
+
+     The pin is position: sticky, not an animation, so it's exact at any
+     scroll speed. Sticky is bounded by the parent's content box, so the grid
+     wrapper is dissolved (display: contents) to make .hero the parent, and
+     the hero's bottom padding becomes a margin inside it (flow-root) so the
+     name stays pinned until that empty band runs out, just before Experience.
+
+     The intro sits a few px under the name, so pinning alone would slide text
+     through text. Each follower (.hero-fade) fades out before its top edge
+     reaches the pinned name's bottom; the page script measures those scroll
+     distances into --fade-from / --fade-to, since they depend on font loading
+     and viewport width. Linear: scroll-linked motion must track the wheel.
+
+     All of it is gated here: without scroll timelines there's no fade, so
+     there must be no pin either. The lens clone carries the `name` class too,
+     hence :not(.dot-lens). */
+  @supports (animation-timeline: scroll()) {
+    .field {
+      animation: field-parallax linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 var(--parallax-range);
+    }
+    @keyframes field-parallax {
+      to {
+        translate: 0 var(--parallax-depth);
+        opacity: 0;
+      }
+    }
+
+    .hero {
+      padding-bottom: 0;
+      display: flow-root;
+    }
+    .hero-grid {
+      display: contents;
+    }
+    .hero-grid > .intro {
+      margin-top: clamp(14px, 1.8vw, 24px);
+    }
+    /* The name is released at the bottom of .hero's content box, and
+       Experience's own top padding used to sit after that, leaving a wide gap
+       as the name left. Moving --pin-extend of that padding into the hero
+       keeps every element where it was but holds the name pinned longer, so
+       it lets go closer to the heading. */
+    :root {
+      --pin-extend: clamp(50px, 6vw, 96px);
+    }
+    .hero-actions {
+      margin-bottom: calc(clamp(220px, 26vw, 360px) + var(--pin-extend));
+    }
+    #experience {
+      padding-top: calc(clamp(96px, 11vw, 160px) - var(--pin-extend));
+    }
+    /* Pinned at its layout position (the hero's top padding). Its static
+       --name-lift offset (set on .name outside this block) rides along, so
+       the name sits fixed exactly where it appears on load, from the first
+       frame to the release. The fade script reads --name-lift to place its
+       ranges, and --fade-hold for how long the followers stay solid first. */
+    :root {
+      --fade-hold: 130px;
+    }
+    .name:not(.dot-lens) {
+      position: sticky;
+      top: clamp(125px, 13vw, 165px);
+    }
+    /* The followers leave bottom-up: buttons, then the second paragraph, then
+       the first. Three scroll-locked (linear) layers per follower, all
+       measured by the fade script:
+       - hero-drift: the whole stack creeps up together (--drift is the share
+         of scroll cancelled) until the name releases. It's only as fast as
+         the first paragraph, which stays visible longest, can go without
+         touching the name, so gaps between followers never close from this.
+       - hero-lift: while fading, a follower also floats up into the gap
+         above it (--lift). The element above is still visible then, so the
+         lift stays inside that gap. Composited `add` so it sums with the
+         drift instead of replacing it.
+       - hero-fade: opacity, linear over a staggered range (an eased curve
+         crammed each fade into a sudden mid-band dip). */
+    .hero-fade {
+      animation:
+        hero-drift linear both,
+        hero-lift linear both,
+        hero-fade linear both;
+      animation-composition: replace, add, replace;
+      animation-timeline: scroll(root), scroll(root), scroll(root);
+      animation-range:
+        0 var(--drift-range, 100vh),
+        var(--fade-from, 0px) var(--fade-to, 1px),
+        var(--fade-from, 0px) var(--fade-to, 1px);
+    }
+    @keyframes hero-drift {
+      to {
+        translate: 0 calc(var(--drift-range, 100vh) * var(--drift, 0.9));
+      }
+    }
+    @keyframes hero-lift {
+      to {
+        translate: 0 calc(var(--lift, 0px) * -1);
+      }
+    }
+    @keyframes hero-fade {
+      to {
+        opacity: 0;
+      }
+    }
+  }
+
+  /* Scoped to :not(.force-motion) so the ?motion=on debug override reaches CSS
+     too, not just the script. Without this, the OS setting silently kills every
+     CSS transition on the page even when the JS animations are forced on. */
+  @media (prefers-reduced-motion: reduce) {
+    html:not(.force-motion) {
+      scroll-behavior: auto;
+    }
+    html:not(.force-motion) .nav-links a,
+    html:not(.force-motion) .nav-links a::after,
+    html:not(.force-motion) .mail::after,
+    html:not(.force-motion) .lk::after,
+    html:not(.force-motion) .cert-more::after {
+      transition: none;
+    }
+    html:not(.force-motion) .field,
+    html:not(.force-motion) .hero-fade,
+    html:not(.force-motion) .name {
+      animation: none;
+    }
+    html:not(.force-motion) .name {
+      position: relative;
+    }
+    /* Page transition keeps its fade (it bridges the swap) but drops the lift. */
+    html:not(.force-motion) main.is-leaving,
+    html:not(.force-motion) footer.is-leaving,
+    html:not(.force-motion) .field.is-leaving,
+    html:not(.force-motion) main.is-entering,
+    html:not(.force-motion) footer.is-entering,
+    html:not(.force-motion) .field.is-entering {
+      translate: none;
+    }
+  }
+
+  /* ---------- phones and touch ---------- */
+  /* On a narrow screen the text column runs the full width, so copy scrolls
+     straight under Home/Work. A scrim behind the links fades in over the
+     first stretch of scroll (at the very top the hero shows through
+     untouched) and fades out downward so it has no hard edge. */
+  @media (max-width: 900px) {
+    .nav-fixed {
+      left: 0;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .nav-fixed::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 -18px;
+      z-index: -1;
+      background: linear-gradient(
+        to bottom,
+        var(--bg) 0%,
+        var(--bg) 58%,
+        rgba(7, 7, 10, 0)
+      );
+    }
+    @supports (animation-timeline: scroll()) {
+      .nav-fixed::before {
+        animation: nav-scrim linear both;
+        animation-timeline: scroll(root);
+        animation-range: 0 140px;
+      }
+      @keyframes nav-scrim {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    }
+  }
+  @media (max-width: 640px) {
+    .nav-links {
+      font-size: 13.5px;
+    }
+  }
+  /* No hover on touch: the cursor-driven bars never fire, so a tap shows the
+     link's bar instead, in place of the browser's grey tap flash. The larger
+     tap areas are padding paid back with an equal negative margin, so nothing
+     on the page moves. */
+  @media (hover: none), (pointer: coarse) {
+    a,
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+    .lk {
+      padding-top: 12px;
+      margin-top: -12px;
+    }
+    .lk:active::after,
+    .nav-links a:active::after {
+      transform: scaleX(1);
+      transition-duration: 0s;
+    }
+  }
+  @media (max-width: 640px) {
+    /* The intro sits on the brightest stretch of the grid at this width. */
+    .field {
+      filter: brightness(0.7);
+    }
+    .cert-meta,
+    .cert-more {
+      font-size: 12px;
+    }
+  }
+  @media (hover: none), (pointer: coarse) {
+    .mail {
+      padding-top: 12px;
+      margin-top: -12px;
+    }
+    .cert-more {
+      padding-top: 12px;
+      margin-top: -10px;
+    }
+    .xp-org a {
+      padding: 14px;
+      margin: -14px;
+    }
+    .btn-flat {
+      height: 48px;
+    }
+    .btn-icon-only {
+      width: 48px;
+    }
+    .mail:active::after,
+    .cert-more:active::after {
+      transform: scaleX(1);
+      transition-duration: 0s;
+    }
+  }
+</style>
+
+<svg style="display: none" aria-hidden="true">
+  <symbol id="i-ur" viewBox="0 0 18 18">
+    <path d="M5.5 12.5 12.5 5.5" />
+    <path d="M6.5 5.5h6v6" />
+  </symbol>
+  <symbol id="i-code" viewBox="0 0 18 18">
+    <path d="M6.5 12.5 3 9l3.5-3.5" />
+    <path d="M11.5 5.5 15 9l-3.5 3.5" />
+  </symbol>
+  <symbol id="i-arrow" viewBox="0 0 22 12">
+    <path d="M0 6h20" />
+    <path d="M15.5 1.5 20 6l-4.5 4.5" />
+  </symbol>
+  <!-- GitHub's official mark: a solid shape, so it fills with currentColor
+       instead of being stroked like the other outline icons. -->
+  <symbol id="i-gh" viewBox="0 0 16 16">
+    <path
+      fill="currentColor"
+      stroke="none"
+      d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+    />
+  </symbol>
+  <symbol id="i-li" viewBox="0 0 18 18">
+    <rect x="2" y="2" width="14" height="14" />
+    <path
+      d="M5.5 7.5v5M5.5 5.2v.1M8.8 12.5v-5M8.8 9.4c0-1 .7-1.6 1.7-1.6s1.7.6 1.7 1.9v2.8"
+    />
+  </symbol>
+</svg>
+
+<canvas class="field" id="field" data-anim="twin" aria-hidden="true"></canvas>
+
+<nav class="nav-fixed">
+  <ul class="nav-links">
+    <li>
+      <a
+        class="nav-link"
+        href="./index-attention.html"
+        aria-current="page"
+        data-field-pull
+        >Home</a
+      >
+    </li>
+    <li><a class="nav-link" href="./work.html" data-field-pull>Work</a></li>
+  </ul>
+</nav>
+
+<main class="shell">
+  <section class="hero">
+    <div class="hero-grid">
+      <h1 class="name magnetic">Tharun Dendukuri.</h1>
+      <p class="intro hero-fade">
+        <strong>I'm a final-year AI engineering student.</strong> I build
+        full-stack AI applications, train and fine-tune models for applied
+        problems, and have research experience in computer vision.
+      </p>
+      <p class="intro intro-2 hero-fade">
+        I enjoy learning new things, and I'm looking for applied ML and AI
+        product roles.
+      </p>
+    </div>
+
+    <div class="hero-actions hero-fade" data-fade-band="160">
+      <a class="btn-flat btn-cta" href="./work.html" data-field-pull data-swap>
+        View Work
+        <svg class="icon"><use href="#i-ur" /></svg>
+      </a>
+      <a
+        class="btn-flat btn-social btn-icon-only"
+        href="https://github.com/tdhdap"
+        target="_blank"
+        rel="noopener noreferrer"
+        data-field-pull
+        aria-label="GitHub"
+      >
+        <svg class="icon"><use href="#i-gh" /></svg>
+      </a>
+      <a
+        class="btn-flat btn-social btn-icon-only"
+        href="https://www.linkedin.com/in/tharun-dendukuri-02a826257/"
+        target="_blank"
+        rel="noopener noreferrer"
+        data-field-pull
+        aria-label="LinkedIn"
+      >
+        <span class="icon icon-li" aria-hidden="true"></span>
+      </a>
+    </div>
+  </section>
+
+  <section class="block" id="experience">
+    <h2 class="sec-title magnetic">Experience</h2>
+    <div class="ledger">
+      <div class="xp">
+        <div>
+          <div class="xp-year tnum">2026</div>
+          <div class="xp-span">Jun - Jul</div>
+        </div>
+        <div>
+          <div class="xp-role">AI Project Intern</div>
+          <div class="xp-org">
+            Aizen Algo
+            <span class="place">Hyderabad, India</span>
+            <a href="#" aria-label="Company site"
+              ><svg class="icon" style="width: 14px; height: 14px">
+                <use href="#i-ur" /></svg
+            ></a>
+          </div>
+          <p class="xp-body">
+            Developed a web application that processes diverse data types to
+            classify version changes in pharmaceutical specification documents.
+            The tool delivers automated reasoning and visual analysis,
+            empowering reviewers to manage, edit, and evaluate the risks of each
+            modification.
+          </p>
+          <div class="xp-links">
+            <a
+              class="lk"
+              href="https://pharma-document-change-analyzer-rea.vercel.app/"
+              target="blank"
+              >Live <svg class="icon"><use href="#i-ur" /></svg
+            ></a>
+            <a
+              class="lk"
+              href="https://github.com/tdhdap/Pharma-Document-Change-Analyzer-react"
+              target="blank"
+              >Code <svg class="icon"><use href="#i-code" /></svg
+            ></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="xp">
+        <div>
+          <div class="xp-year tnum">2026</div>
+          <div class="xp-span">Jan</div>
+        </div>
+        <div>
+          <div class="xp-role">AI Engineer</div>
+          <div class="xp-org">
+            Enigma CS
+            <span class="place">Hyderabad, India</span>
+          </div>
+          <p class="xp-body">
+            Engineered a visual research tool that translates complex academic
+            papers into interactive conceptual graphs and summaries, allowing
+            users to explore deep-dive concepts and map relationships through
+            click-driven node analysis.
+          </p>
+          <div class="xp-links">
+            <a class="lk" href="https://nodeseeker.vercel.app/" target="blank"
+              >Live <svg class="icon"><use href="#i-ur" /></svg
+            ></a>
+            <a
+              class="lk"
+              href="https://github.com/tdhdap/NodeSeeker-AI-Research-Paper-Explorer"
+              target="blank"
+              >Code <svg class="icon"><use href="#i-code" /></svg
+            ></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="skills">
+    <h2 class="sec-title magnetic">Toolkit</h2>
+    <div class="kit">
+      <div class="kit-row">
+        <div class="kit-k">Languages</div>
+        <div class="kit-v">
+          Python&nbsp;<i>/</i> JavaScript&nbsp;<i>/</i> SQL&nbsp;<i>/</i> C
+        </div>
+      </div>
+      <div class="kit-row">
+        <div class="kit-k">Data Science &amp; ML</div>
+        <div class="kit-v">
+          scikit-learn&nbsp;<i>/</i> Pandas&nbsp;<i>/</i> NumPy&nbsp;<i>/</i>
+          Matplotlib&nbsp;<i>/</i> Seaborn
+        </div>
+      </div>
+      <div class="kit-row">
+        <div class="kit-k">Frameworks &amp; Libraries</div>
+        <div class="kit-v">
+          PyTorch&nbsp;<i>/</i> FastAPI&nbsp;<i>/</i> React&nbsp;<i>/</i>
+          LangChain&nbsp;<i>/</i> Streamlit&nbsp;<i>/</i> OpenCV&nbsp;<i>/</i>
+          Hugging&nbsp;Face
+        </div>
+      </div>
+      <div class="kit-row">
+        <div class="kit-k">Developer Tools</div>
+        <div class="kit-v">
+          VS&nbsp;Code&nbsp;<i>/</i> PyCharm&nbsp;<i>/</i>
+          Google&nbsp;Colab&nbsp;<i>/</i> Git&nbsp;<i>/</i> GitHub
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="sec-rule" />
+
+  <section class="block" id="certs">
+    <h2 class="sec-title magnetic">Certifications</h2>
+    <!-- Two rows: the three from 2025 above, the four Stanford ones below.
+         Each card is placed by hand -- which column it starts in, how many it
+         spans, which row, which of the two levels it sits on, and how far
+         it drifts as the section passes. Changing a card's
+         place is changing those numbers; nothing is worked out at runtime. -->
+    <div class="cert-grid">
+      <article class="cert-tile">
+        <div class="cert-shot">
+          <img
+            src="./assets/certs/cert-7.jpg"
+            alt="Machine Learning certificate"
+          />
+        </div>
+        <p class="cert-meta tnum">MAR 2024 &middot; STANFORD UNIVERSITY</p>
+        <h3 class="cert-name">Machine Learning</h3>
+        <a
+          class="cert-more"
+          href="https://www.coursera.org/account/accomplishments/specialization/7TMCFRZB6XUV"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Verify <svg class="icon"><use href="#i-ur" /></svg
+        ></a>
+      </article>
+
+      <article class="cert-tile">
+        <div class="cert-shot">
+          <img
+            src="./assets/certs/cert-3.jpg"
+            alt="Data Science Project Based Learning certificate"
+          />
+        </div>
+        <p class="cert-meta tnum">DEC 2025 &middot; GEEKSFORGEEKS</p>
+        <h3 class="cert-name">Data Science Project Based Learning</h3>
+        <a
+          class="cert-more"
+          href="https://www.geeksforgeeks.org/certificate/1de89068154405ff24d632a4e0bf256a"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Verify <svg class="icon"><use href="#i-ur" /></svg
+        ></a>
+      </article>
+
+      <article class="cert-tile">
+        <div class="cert-shot">
+          <img
+            src="./assets/certs/cert-5.jpg"
+            alt="Advanced Learning Algorithms certificate"
+          />
+        </div>
+        <p class="cert-meta tnum">MAR 2024 &middot; STANFORD ONLINE</p>
+        <h3 class="cert-name">Advanced Learning Algorithms</h3>
+        <a
+          class="cert-more"
+          href="https://www.coursera.org/account/accomplishments/certificate/2GRVK92QNN9Y"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Verify <svg class="icon"><use href="#i-ur" /></svg
+        ></a>
+      </article>
+
+      <article class="cert-tile">
+        <div class="cert-shot">
+          <img src="./assets/certs/cert-2.jpg" alt="Data Science certificate" />
+        </div>
+        <p class="cert-meta tnum">DEC 2025 &middot; IBM</p>
+        <h3 class="cert-name">Data Science</h3>
+        <a
+          class="cert-more"
+          href="https://courses.gfg.skillsnetwork.site/certificates/394635add3a845619be7a946c7fcc319"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Verify <svg class="icon"><use href="#i-ur" /></svg
+        ></a>
+      </article>
+
+      <article class="cert-tile">
+        <div class="cert-shot">
+          <img
+            src="./assets/certs/cert-6.jpg"
+            alt="Supervised Machine Learning: Regression and Classification certificate"
+          />
+        </div>
+        <p class="cert-meta tnum">JAN 2024 &middot; STANFORD ONLINE</p>
+        <h3 class="cert-name">
+          Supervised Machine Learning: Regression and Classification
+        </h3>
+        <a
+          class="cert-more"
+          href="https://www.coursera.org/account/accomplishments/certificate/44P9H3KG4CTU"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Verify <svg class="icon"><use href="#i-ur" /></svg
+        ></a>
+      </article>
+
+      <article class="cert-tile">
+        <div class="cert-shot">
+          <img
+            src="./assets/certs/cert-4.jpg"
+            alt="Unsupervised Learning, Recommenders certificate"
+          />
+        </div>
+        <p class="cert-meta tnum">MAR 2024 &middot; STANFORD ONLINE</p>
+        <h3 class="cert-name">Unsupervised Learning, Recommenders</h3>
+        <a
+          class="cert-more"
+          href="https://www.coursera.org/account/accomplishments/certificate/KN47BY9DRU5N"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Verify <svg class="icon"><use href="#i-ur" /></svg
+        ></a>
+      </article>
+
+      <article class="cert-tile">
+        <div class="cert-shot">
+          <img
+            src="./assets/certs/cert-1.jpg"
+            alt="Python 101 For Data Science certificate"
+          />
+        </div>
+        <p class="cert-meta tnum">DEC 2025 &middot; IBM</p>
+        <h3 class="cert-name">Python 101 For Data Science</h3>
+        <a
+          class="cert-more"
+          href="https://courses.gfg.skillsnetwork.site/certificates/b52b83bc2fa64ede825c13b40fee43bc"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Verify <svg class="icon"><use href="#i-ur" /></svg
+        ></a>
+      </article>
+
+      <article class="cert-tile">
+        <div class="cert-shot">
+          <img
+            src="./assets/certs/cert-8.jpg"
+            alt="Design Thinking certificate"
+          />
+        </div>
+        <p class="cert-meta tnum">SEP 2026 &middot; PRODUCTDESIGNGUIDES.ORG</p>
+        <h3 class="cert-name">Design Thinking</h3>
+        <a
+          class="cert-more"
+          href="https://app.procertif.com/wallet/6aa971adb9e18/2609THADEN743"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Verify <svg class="icon"><use href="#i-ur" /></svg
+        ></a>
+      </article>
+    </div>
+  </section>
+
+  <hr class="sec-rule" />
+
+  <section class="block" id="contact">
+    <h2 class="sec-title magnetic">Say hello</h2>
+    <div>
+      <a class="mail" href="#">tharunsden@gmail.com</a>
+      <p class="note">Open to new-grad ML roles.</p>
+    </div>
+  </section>
+</main>
+
+<div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+
+<script src="./twin-field.js?v=11"></script>
+
+<script>
+  (function () {
+    // True while the cursor is over the field canvas, where the dot is hidden and
+    // the animation is the only cursor. The lens below reads this so it hides too:
+    // a blue circle with no dot attached to it reads as a stray artifact.
+    var overField = false;
+    // True once the pointer has left the window entirely. Both the dot and the
+    // lens park themselves on it, so neither is left frozen mid-page.
+    var pointerGone = false;
+
+    /* ---------- custom cursor dot ----------
+     Hidden while over the field canvas, so only the animation shows the
+     cursor there. A plain white dot everywhere else. Listeners are named and
+     unregistered in a cleanup callback because page-swap.js re-runs this
+     whole script on every Home/Work swap instead of a real page load; without
+     removing the old ones first, each swap would pile on another mousemove
+     listener still pointing at the previous page's (now detached) dot/field. */
+    (function () {
+      var dot = document.getElementById("cursorDot");
+      // The page is rendered at --page-zoom, so a transform set inside it is
+      // scaled by that too, while pointer coordinates are not. Divide, or the
+      // dot trails the pointer by a tenth of the distance from the corner.
+      var ZOOM =
+        parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            "--page-zoom",
+          ),
+        ) || 1;
+      var field = document.getElementById("field");
+      if (
+        !dot ||
+        !field ||
+        matchMedia("(hover:none), (pointer:coarse)").matches
+      )
+        return;
+
+      // True whenever the dot is actually hidden (opacity 0): while over the
+      // field and off both the nav and a button. Landing on the nav directly
+      // from this state should not visibly morph from a small dot into a
+      // ring; there was nothing on screen a moment ago, so it should just
+      // appear already as a ring.
+      var wasHidden = true;
+      // The button currently showing the inverted (is-active) state, if any.
+      // Tracked so it can be cleared the moment onFace stops being true for
+      // it, rather than leaving a button stuck inverted after a fast move.
+      var activeBtn = null;
+      // The nav link currently showing its underline bar via proximity, if
+      // any. Tracked the same way as activeBtn.
+      var activeNav = null;
+      // The email link currently showing its blue underline, if any.
+      var activeMail = null;
+
+      // The dot's position is written on every mousemove (a style write, no
+      // reads, so it can't fall behind a fast pointer). Everything that has
+      // to measure the page — the field's box and opacity, each button's
+      // box, the nav links' boxes — is batched into one pass per frame,
+      // because doing those reads per event is what made the dot lag.
+      var mx = 0,
+        my = 0,
+        moveTarget = null,
+        queued = false,
+        hasPos = false;
+
+      function onMove(e) {
+        pointerGone = false;
+        mx = e.clientX;
+        my = e.clientY;
+        moveTarget = e.target;
+        hasPos = true;
+        dot.style.transform =
+          "translate(" +
+          mx / ZOOM +
+          "px," +
+          my / ZOOM +
+          "px) translate(-50%,-50%)";
+        if (!queued) {
+          queued = true;
+          requestAnimationFrame(classify);
+        }
+      }
+
+      function classify() {
+        queued = false;
+        if (!hasPos || pointerGone) return;
+        // What's under the pointer now, not what the last mousemove landed
+        // on: scrolling slides the page under a still pointer, and a stale
+        // target left the dot grown over plain text after leaving a link.
+        var e = {
+          clientX: mx,
+          clientY: my,
+          target: document.elementFromPoint(mx, my) || moveTarget,
+        };
+        var r = field.getBoundingClientRect();
+        // The parallax fades the field out as the page scrolls; past that
+        // point it's still in the box but invisible, and hiding the dot over
+        // nothing would lose the cursor entirely.
+        overField =
+          e.clientX >= r.left &&
+          e.clientX <= r.right &&
+          e.clientY >= r.top &&
+          e.clientY <= r.bottom &&
+          parseFloat(getComputedStyle(field).opacity) > 0.35;
+        // The nav and the buttons both sit inside the field's box, so without
+        // these exceptions they would have no visible cursor at all on hover,
+        // which is worse feedback than plain text gets.
+        var closest = e.target && e.target.closest;
+        var onNav = !!(closest && e.target.closest(".nav-fixed"));
+        // onNav (above) is what opens the ring and shows the dot at all — it
+        // fires the instant the pointer enters the nav's big enlarged hit
+        // zone, on purpose, so the ring reacts from a distance. The
+        // underline bar underneath is a separate, later signal: it should
+        // only show once the ring has actually closed in on that specific
+        // link's real text, not the moment the broad zone is entered. So it
+        // gets its own tighter proximity check against each link's own rect.
+        var NAV_LEAD = 6;
+        var nextNav = null;
+        if (onNav) {
+          var navLinks = document.querySelectorAll(".nav-links a");
+          for (var ni = 0; ni < navLinks.length; ni++) {
+            var nr = navLinks[ni].getBoundingClientRect();
+            if (
+              e.clientX >= nr.left - NAV_LEAD &&
+              e.clientX <= nr.right + NAV_LEAD &&
+              e.clientY >= nr.top - NAV_LEAD &&
+              e.clientY <= nr.bottom + NAV_LEAD
+            ) {
+              nextNav = navLinks[ni];
+              break;
+            }
+          }
+        }
+        if (activeNav !== nextNav) {
+          if (activeNav) activeNav.classList.remove("is-near");
+          if (nextNav) nextNav.classList.add("is-near");
+          activeNav = nextNav;
+        }
+        // The buttons sit close enough together now that their enlarged hit
+        // zones overlap. Native hit-testing (e.target.closest) would then pick
+        // whichever button happens to paint on top in the overlap (later in
+        // the DOM), not whichever is actually closer to the pointer — which
+        // read as "only activates from one side." So this measures every
+        // button directly and picks the nearest one within reach, instead of
+        // trusting which element the mouse event landed on.
+        var HIT_X = 50,
+          HIT_Y = 50; // matches .btn-flat::after's inset
+        var onBtn = null,
+          bestDist = Infinity;
+        var btns = document.querySelectorAll(".btn-flat");
+        // The hero buttons fade out as they scroll up under the pinned name;
+        // once they're effectively gone they shouldn't catch the ring/invert.
+        var actions = document.querySelector(".hero-actions");
+        var actionsGone =
+          actions && parseFloat(getComputedStyle(actions).opacity) < 0.35;
+        for (var bi = 0; bi < btns.length; bi++) {
+          if (actionsGone && actions.contains(btns[bi])) continue;
+          var rect = btns[bi].getBoundingClientRect();
+          var inX =
+            e.clientX >= rect.left - HIT_X && e.clientX <= rect.right + HIT_X;
+          var inY =
+            e.clientY >= rect.top - HIT_Y && e.clientY <= rect.bottom + HIT_Y;
+          if (!inX || !inY) continue;
+          var dx = Math.max(rect.left - e.clientX, 0, e.clientX - rect.right);
+          var dy = Math.max(rect.top - e.clientY, 0, e.clientY - rect.bottom);
+          var dist = Math.hypot(dx, dy);
+          if (dist < bestDist) {
+            bestDist = dist;
+            onBtn = btns[bi];
+          }
+        }
+        // ...and the dot opens into a ring a touch before it fully crosses
+        // the button's edge: at the edge itself (lead 0) about half the dot
+        // already overlaps, so a small outward lead fires it once only
+        // ~30% of the dot has crossed in instead of waiting for half.
+        var RING_LEAD = 3;
+        var onFace = false;
+        if (onBtn) {
+          var br = onBtn.getBoundingClientRect();
+          onFace =
+            e.clientX >= br.left - RING_LEAD &&
+            e.clientX <= br.right + RING_LEAD &&
+            e.clientY >= br.top - RING_LEAD &&
+            e.clientY <= br.bottom + RING_LEAD;
+        }
+
+        // The button's invert rides on the exact same onFace flag that opens
+        // the ring, so both react on the same frame instead of two separate
+        // triggers drifting out of sync.
+        var nextActive = onFace ? onBtn : null;
+        if (activeBtn !== nextActive) {
+          if (activeBtn) activeBtn.classList.remove("is-active");
+          if (nextActive) nextActive.classList.add("is-active");
+          activeBtn = nextActive;
+        }
+
+        // The email link also gets the (white) ring as its hover signal, with
+        // its underline turning blue in step, in place of a text colour change.
+        // The Live/Code links and the certifications' Verify links get the
+        // identical treatment.
+        var mailHit =
+          (closest && e.target.closest(".mail, .lk, .cert-more")) || null;
+        var onMail = !!mailHit;
+        if (activeMail !== mailHit) {
+          if (activeMail) activeMail.classList.remove("is-ringed");
+          if (mailHit) mailHit.classList.add("is-ringed");
+          activeMail = mailHit;
+        }
+
+        // Home/Work show the ring only, never the dot.
+        // The nav's hit strip is wide so the bar can be caught from a distance;
+        // the dot's growth uses the tight check instead, so it swells on the
+        // word rather than on the approach to it.
+        var showRing = !!(onFace || nextNav || onMail);
+        // The dot used to vanish over the field and let the halo stand in for
+        // it. It reads as the cursor being lost behind the pattern, so it
+        // stays: the halo follows it rather than replacing it.
+        var hidden = false;
+
+        // The dot only jumps straight to its grown size if it is actually
+        // growing: keyed to onNav, it swelled anywhere in the nav's wide hit
+        // strip, well before the pointer reached a word.
+        if (showRing && wasHidden) {
+          // Jump straight to the ring with no width/height animation, since
+          // the dot was not visible a moment ago to morph from.
+          dot.style.transition = "none";
+          dot.classList.add("is-ring");
+          dot.style.opacity = "1";
+          dot.style.transform =
+            "translate(" +
+            e.clientX / ZOOM +
+            "px," +
+            e.clientY / ZOOM +
+            "px) translate(-50%,-50%)";
+          dot.offsetWidth; // flush the style change before re-enabling transitions
+          dot.style.transition = "";
+        } else {
+          dot.classList.toggle("is-ring", showRing);
+          dot.style.opacity = hidden ? "0" : "1";
+          dot.style.transform =
+            "translate(" +
+            e.clientX / ZOOM +
+            "px," +
+            e.clientY / ZOOM +
+            "px) translate(-50%,-50%)";
+        }
+        wasHidden = hidden;
+      }
+
+      // mouseleave on window is unreliable for viewport exits. A mouseout with
+      // no relatedTarget means the pointer left the document; blur covers
+      // alt-tab and clicking into devtools, where no mouse event ever arrives.
+      function park() {
+        pointerGone = true;
+        dot.style.opacity = "0";
+        if (activeBtn) {
+          activeBtn.classList.remove("is-active");
+          activeBtn = null;
+        }
+        if (activeNav) {
+          activeNav.classList.remove("is-near");
+          activeNav = null;
+        }
+        if (activeMail) {
+          activeMail.classList.remove("is-ringed");
+          activeMail = null;
+        }
+      }
+      function onOut(e) {
+        if (!e.relatedTarget) park();
+      }
+
+      // Scrolling moves what's under a still pointer, so it re-runs the same
+      // per-frame check a mousemove would.
+      function onScroll() {
+        if (!hasPos || pointerGone || queued) return;
+        queued = true;
+        requestAnimationFrame(classify);
+      }
+
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("scroll", onScroll, { passive: true });
+      document.addEventListener("mouseout", onOut);
+      document.addEventListener("mouseleave", park);
+      window.addEventListener("blur", park);
+      window.__cleanup.push(function () {
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("scroll", onScroll);
+        document.removeEventListener("mouseout", onOut);
+        document.removeEventListener("mouseleave", park);
+        window.removeEventListener("blur", park);
+      });
+    })();
+
+    /* ---------- what the dot does to what it covers ----------
+     Every block the dot can cross has a copy of itself in a fixed layer that
+     sits above the dot. The copy is clipped to a circle the size of the dot
+     and pinned over the original, so inside that circle you see the copy --
+     black text, a black bar, a black button face -- and everywhere else the
+     original, untouched.
+
+     The copies live in one layer on the body rather than inside the blocks
+     they duplicate, which is the whole point: a copy inside its block inherits
+     that block's place in the stacking order, and anything with its own
+     stacking context (the hero's button row, a sticky heading) buried the copy
+     under the dot. Out here there is one rule -- this layer is above the dot
+     -- and it holds everywhere.
+
+     The copy's classes are re-read from the original each frame, so a state
+     the cursor script sets on a link (its cobalt bar, a button's active
+     colours) appears inside the circle in the same frame it appears outside. */
+    (function () {
+      var ZOOM =
+        parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            "--page-zoom",
+          ),
+        ) || 1;
+      var blocks = document.querySelectorAll(
+        ".magnetic, .btn-flat, .nav-links a, .lk, .mail, .cert-more",
+      );
+      if (
+        !blocks.length ||
+        matchMedia("(hover:none), (pointer:coarse)").matches
+      )
+        return;
+
+      var dotEl = document.querySelector(".cursor-dot");
+      function dotHidden() {
+        // The inline value the cursor script sets, not the computed one: the
+        // dot fades over 150ms, and reading it mid-fade parks the lens.
+        return pointerGone || !dotEl || dotEl.style.opacity === "0";
+      }
+      function dotRadius() {
+        return dotEl ? dotEl.getBoundingClientRect().width / 2 : 16;
+      }
+
+      var host = document.createElement("div");
+      host.className = "lens-host";
+      host.setAttribute("aria-hidden", "true");
+      document.body.appendChild(host);
+
+      var MATCH = [
+        "display",
+        "boxSizing",
+        "paddingTop",
+        "paddingRight",
+        "paddingBottom",
+        "paddingLeft",
+        "fontFamily",
+        "fontSize",
+        "fontWeight",
+        "fontStyle",
+        "letterSpacing",
+        "wordSpacing",
+        "textTransform",
+        "lineHeight",
+        "whiteSpace",
+        "textAlign",
+      ];
+      var lenses = [];
+      blocks.forEach(function (block) {
+        var lens = block.cloneNode(true);
+        lens.className = block.className + " dot-lens";
+        lens.setAttribute("aria-hidden", "true");
+        // Duplicated ids would be invalid markup.
+        lens.removeAttribute("id");
+        lens.querySelectorAll("[id]").forEach(function (el) {
+          el.removeAttribute("id");
+        });
+        lens.style.position = "fixed";
+        lens.style.margin = "0";
+        lens.style.pointerEvents = "none";
+        lens.style.userSelect = "none";
+        lens.style.clipPath = "circle(0px at -999px -999px)";
+        host.appendChild(lens);
+        lenses.push({ block: block, lens: lens, live: false });
+      });
+
+      var mx = -9999,
+        my = -9999;
+      function park(entry) {
+        if (!entry.live) return;
+        entry.live = false;
+        entry.lens.style.clipPath = "circle(0px at -999px -999px)";
+      }
+      // The hero buttons fade out on scroll but keep their box; a copy of a
+      // block that has faded away mustn't reappear inside the dot. Walks
+      // ancestors because the opacity that hides it isn't on the block itself.
+      function visibleEnough(el) {
+        var o = 1;
+        for (
+          var node = el;
+          node && node.nodeType === 1;
+          node = node.parentElement
+        ) {
+          var v = parseFloat(getComputedStyle(node).opacity);
+          if (!isNaN(v)) o *= v;
+          if (o < 0.35) return false;
+        }
+        return true;
+      }
+      function update() {
+        var r = dotRadius(); // window pixels
+        var hidden = dotHidden();
+        for (var i = 0; i < lenses.length; i++) {
+          var entry = lenses[i];
+          var b = entry.block.getBoundingClientRect();
+          // Nothing to draw unless the dot actually reaches this block.
+          if (
+            hidden ||
+            mx + r < b.left ||
+            mx - r > b.right ||
+            my + r < b.top ||
+            my - r > b.bottom ||
+            !visibleEnough(entry.block)
+          ) {
+            park(entry);
+            continue;
+          }
+          var lens = entry.lens;
+          // Copied each time the copy comes into use (so it follows resizes):
+          // styles the original inherits from its own parents -- the nav's
+          // size, tracking, capitals and padding -- would otherwise be lost
+          // when the copy is moved out here, and its text would sit off the
+          // original's.
+          if (!entry.live) {
+            var cs = getComputedStyle(entry.block);
+            for (var k = 0; k < MATCH.length; k++)
+              lens.style[MATCH[k]] = cs[MATCH[k]];
+          }
+          entry.live = true;
+          // The page is scaled, so a fixed box's own coordinates are the
+          // window's divided by that scale.
+          lens.style.left = b.left / ZOOM + "px";
+          lens.style.top = b.top / ZOOM + "px";
+          lens.style.width = b.width / ZOOM + "px";
+          lens.style.height = b.height / ZOOM + "px";
+          // Whatever state the original is in, the copy is in it too.
+          var want = entry.block.className + " dot-lens";
+          if (lens.className !== want) lens.className = want;
+          lens.style.clipPath =
+            "circle(" +
+            r / ZOOM +
+            "px at " +
+            (mx - b.left) / ZOOM +
+            "px " +
+            (my - b.top) / ZOOM +
+            "px)";
+        }
+      }
+      function onMove(e) {
+        mx = e.clientX;
+        my = e.clientY;
+      }
+      // Driven by its own continuous frame loop rather than by events, unlike
+      // the rest of this page's scripts. The dot's grow-on-hover is a 220ms
+      // CSS transition with no JS tick of its own; an event-triggered update
+      // (mousemove/scroll/resize) draws one frame of it and then freezes --
+      // measured, a single entry onto a button left the clip radius stuck at
+      // 14px while the dot went on growing to 50px, for as long as the
+      // pointer then held still. Every block's own class is cheap to read and
+      // the block count is small, so running this every frame costs nothing
+      // worth gating.
+      var frame = null;
+      function loop() {
+        update();
+        frame = requestAnimationFrame(loop);
+      }
+      window.addEventListener("mousemove", onMove);
+      frame = requestAnimationFrame(loop);
+      window.__cleanup.push(function () {
+        window.removeEventListener("mousemove", onMove);
+        if (frame) cancelAnimationFrame(frame);
+        host.remove();
+      });
+    })();
+
+    /* ---------- hero fades under the pinned name ----------
+     Each .hero-fade element should be fully transparent by the scroll
+     distance at which its top edge reaches the pinned name's bottom edge,
+     fading over the FADE_BAND px of scroll before that. Those distances move
+     with font loading and viewport width, so they're measured rather than
+     hardcoded, and written onto each element itself as the animation-range.
+     They leave bottom-up (buttons first, first paragraph last), spread
+     across the pin so all are gone by release. The stack drifts up together
+     only as fast as the first paragraph can without touching the name, and
+     each follower lifts into the gap above it while it fades. */
+    (function () {
+      var name = document.querySelector(".name:not(.dot-lens)");
+      var hero = document.querySelector(".hero");
+      var items = document.querySelectorAll(".hero-fade");
+      var main = document.querySelector("main");
+      if (!name || !hero || !items.length || !main) return;
+
+      var FADE_BAND = 280;
+      var MAX_RISE = 0.1; // fastest the whole stack may drift
+      var MAX_LIFT = 40; // px, the most any follower floats up while fading
+      var GAP_SAFETY = 4; // px kept clear of the name / the element above
+
+      function measure() {
+        var cs = getComputedStyle(name);
+        if (cs.position !== "sticky") return; // no pin, so no fade range needed
+        // Sticky works off the untransformed box; the settle animation then
+        // lifts the name by --name-lift, which is where followers meet it.
+        var layoutBottom = parseFloat(cs.top) + name.offsetHeight;
+        var lift = parseFloat(cs.getPropertyValue("--name-lift")) || 0;
+        var pinnedBottom = layoutBottom - lift;
+        // Sticky lets go when .hero's content-box bottom reaches the pinned
+        // name's layout bottom (the hero has no bottom padding in this mode).
+        var heroBottom = hero.getBoundingClientRect().bottom + window.scrollY;
+        var release = Math.max(1, heroBottom - layoutBottom);
+        // Hold everything solid through the name's settle and a beat after,
+        // so the first scroll reads as "name moves", not "text dims".
+        var hold = parseFloat(cs.getPropertyValue("--fade-hold")) || 0;
+        var mainTop = main.getBoundingClientRect().top + window.scrollY;
+        var n = items.length;
+        var tops = [],
+          bottoms = [];
+        for (var i = 0; i < n; i++) {
+          // offsetTop ignores the translates; getBoundingClientRect wouldn't.
+          var top = mainTop + items[i].offsetTop;
+          tops.push(top);
+          bottoms.push(top + items[i].offsetHeight);
+        }
+
+        // The first paragraph fades last, ending at release, so the shared
+        // drift is capped by how far it can rise in that time without
+        // touching the name.
+        var rise = Math.max(
+          0,
+          Math.min(MAX_RISE, (tops[0] - pinnedBottom - GAP_SAFETY) / release),
+        );
+
+        for (var j = 0; j < n; j++) {
+          // Bottom-up: the last follower (buttons) gets the earliest slot.
+          var k = n - 1 - j;
+          var to = hold + ((release - hold) * (k + 1)) / n;
+          // The buttons get a shorter band (data-fade-band): solid cobalt at
+          // half opacity over the field looks muddy, so pass through it fast.
+          var band = parseFloat(items[j].dataset.fadeBand) || FADE_BAND;
+          var from = Math.max(0, Math.min(to - 1, Math.max(hold, to - band)));
+          // Float up into the gap above; the element above is still visible
+          // while this one fades, so never past it. The first paragraph has
+          // only the name above it, which the drift already accounts for.
+          var lift =
+            j === 0
+              ? 0
+              : Math.max(
+                  0,
+                  Math.min(MAX_LIFT, tops[j] - bottoms[j - 1] - GAP_SAFETY),
+                );
+          items[j].style.setProperty("--drift-range", release + "px");
+          items[j].style.setProperty("--drift", String(1 - rise));
+          items[j].style.setProperty("--fade-from", from + "px");
+          items[j].style.setProperty("--fade-to", to + "px");
+          items[j].style.setProperty("--lift", lift + "px");
+        }
+      }
+
+      measure();
+      if (document.fonts && document.fonts.ready)
+        document.fonts.ready.then(measure);
+      var rt;
+      function onResize() {
+        clearTimeout(rt);
+        rt = setTimeout(measure, 150);
+      }
+      window.addEventListener("resize", onResize);
+      window.__cleanup.push(function () {
+        window.removeEventListener("resize", onResize);
+        clearTimeout(rt);
+      });
+    })();
+
+    /* ---------- twin field sizing ----------
+     The canvas self-mounts and drives its own rAF loop from twin-field.js;
+     all this does is give it the same CSS box the flow grid had, measured
+     from the hero down past the Experience heading. */
+    (function () {
+      var cv = document.getElementById("field");
+      if (!cv) return;
+
+      var FIELD_TOP = 0; // matches .field's CSS top; no nav bar to sit below now
+      var CLEARANCE = -48; // gap between the field's end and the Experience heading
+      var GROW = 1.2; // push it past that line; 1 ends it right at the heading
+      var SHRINK = 150; // flat trim off the computed height
+      var CELL = 18; // matches twin-field.js's own CELL; rows there no longer
+      // overscan, so the height handed to it must land exactly on a cell
+      // boundary or the last row is cut off mid-tile.
+
+      function fitHeight() {
+        var exp = document.getElementById("experience");
+        if (!exp) return;
+        // Experience's top now sits --pin-extend lower (that padding moved
+        // into the hero); take it back out so the tuned field height holds.
+        var expTop =
+          exp.getBoundingClientRect().top +
+          window.scrollY -
+          (parseFloat(getComputedStyle(exp).getPropertyValue("--pin-extend")) ||
+            0);
+        var raw = Math.max(
+          320,
+          (expTop - CLEARANCE - FIELD_TOP) * GROW - SHRINK,
+        );
+        cv.style.height = Math.round(raw / CELL) * CELL + "px";
+      }
+
+      fitHeight();
+      var rt;
+      function onResize() {
+        clearTimeout(rt);
+        rt = setTimeout(fitHeight, 150);
+      }
+      window.addEventListener("resize", onResize);
+      window.__cleanup.push(function () {
+        window.removeEventListener("resize", onResize);
+        clearTimeout(rt);
+      });
+    })();
+  })();
+</script>

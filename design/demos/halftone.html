@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Halftone breathing - demo</title>
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ background:#07070A; height:100%; overflow:hidden; }
+  body{ font-family:ui-sans-serif, system-ui, sans-serif; }
+  canvas{ position:fixed; inset:0; display:block; }
+  .tag{
+    position:fixed; top:20px; left:20px; z-index:2; display:flex; align-items:center; gap:10px;
+    font-size:12.5px; color:#9A9AA4;
+  }
+  .tag a{ color:#5C86FF; text-decoration:none; border-bottom:1px solid rgba(92,134,255,.4); padding-bottom:2px; }
+  .tag a:hover{ color:#fff; border-color:#fff; }
+  .tag b{ color:#F2F2F4; font-weight:600; }
+  .hint{
+    position:fixed; bottom:20px; left:20px; z-index:2; font-family:ui-monospace,monospace;
+    font-size:11px; color:#61616B; max-width:340px; line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<div class="tag"><a href="./index.html">&larr; All demos</a><span>/</span><b>04 Halftone breathing</b></div>
+<div class="hint">A dot grid pulsing size and opacity slowly. Dots near the cursor grow larger and brighter.</div>
+<canvas id="c"></canvas>
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (location.search.indexOf('motion=on') !== -1) reduce = false;
+  if (location.search.indexOf('motion=off') !== -1) reduce = true;
+
+  var cv = document.getElementById('c');
+  var ctx = cv.getContext('2d');
+  var w, h, dpr, SPACING = 27;
+  var mouse = { x:-9999, y:-9999 };
+
+  function size(){
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    w = innerWidth; h = innerHeight;
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function draw(t){
+    ctx.fillStyle = '#07070A';
+    ctx.fillRect(0, 0, w, h);
+    var cols = Math.ceil(w / SPACING) + 1;
+    var rows = Math.ceil(h / SPACING) + 1;
+
+    for (var i = 0; i < cols; i++){
+      var x = i * SPACING;
+      for (var j = 0; j < rows; j++){
+        var y = j * SPACING;
+        var n = Math.sin(x * 0.018 + t) * Math.cos(y * 0.018 + t * 0.85);
+        var radius = 0.6 + (n + 1) * 0.5 * 2.4;
+        var alpha = 0.10 + (n + 1) * 0.5 * 0.4;
+
+        var dx = mouse.x - x, dy = mouse.y - y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        var color = '27,77,255';
+        if (dist < 170){
+          var f = 1 - dist / 170;
+          radius += f * 4.2;
+          alpha = Math.min(1, alpha + f * 0.65);
+          color = '92,134,255';
+        }
+
+        ctx.fillStyle = 'rgba(' + color + ',' + alpha + ')';
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  var raf, time = 0;
+  function frame(){ time += 0.01; draw(time); raf = requestAnimationFrame(frame); }
+
+  size(); draw(0);
+  if (!reduce){
+    raf = requestAnimationFrame(frame);
+    addEventListener('mousemove', function(e){ mouse.x = e.clientX; mouse.y = e.clientY; });
+    addEventListener('mouseleave', function(){ mouse.x = -9999; mouse.y = -9999; });
+  }
+  addEventListener('resize', function(){ size(); draw(time); });
+})();
+</script>
+</body>
+</html>

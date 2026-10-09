@@ -1,0 +1,1106 @@
+<title>Tharun</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+  rel="stylesheet"
+/>
+<script>
+  document.documentElement.classList.add("js");
+  // Motion is ON by default while this is a design preview, so the CSS
+  // reduced-motion block is disarmed unless ?motion=off asks for it back.
+  if (location.search.indexOf("motion=off") === -1)
+    document.documentElement.classList.add("force-motion");
+</script>
+<style>
+  :root {
+    --bg: #07070a;
+    --fg: #f2f2f4;
+    --fg-2: #9a9aa4;
+    --fg-3: #61616b;
+    --line: rgba(255, 255, 255, 0.1);
+    --line-2: rgba(255, 255, 255, 0.18);
+
+    --cobalt: #1b4dff; /* fills and particles */
+    --cobalt-hi: #3b66ff; /* fill hover */
+    --navy: #101b4d; /* the darker block */
+    --link: #5c86ff; /* small text: same family, readable on black */
+    --wash: rgba(27, 77, 255, 0.16);
+
+    --sans: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-ui: cubic-bezier(0.23, 1, 0.32, 1);
+    --shell: 1280px;
+    --gut: clamp(20px, 4vw, 56px);
+  }
+
+  * {
+    box-sizing: border-box;
+    border-radius: 0;
+    cursor: none;
+  }
+
+  /* A small filled dot everywhere, opening into a hollow ring over a button
+     face. The border is always present (transparent when it's a dot) so
+     box-sizing:border-box keeps the outer size stable across the swap.
+     Positioned by its centre (the -50% pair in the transform). */
+  .cursor-dot {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid transparent;
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0; /* above all content */
+    transform: translate(-1000px, -1000px);
+    transition:
+      opacity 0.15s ease,
+      width 0.22s var(--ease-ui),
+      height 0.22s var(--ease-ui),
+      background-color 0.18s var(--ease-ui),
+      border-color 0.18s var(--ease-ui);
+  }
+  /* Over a button face the dot opens into a ring. */
+  .cursor-dot.is-ring {
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border-color: #fff;
+  }
+  @media (hover: none) and (pointer: coarse) {
+    * {
+      cursor: auto;
+    }
+    .cursor-dot {
+      display: none;
+    }
+  }
+  html {
+    background: var(--bg);
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    padding-inline: var(--gut);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: -0.04em;
+  }
+  p {
+    margin: 0;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .shell {
+    max-width: var(--shell);
+    margin-inline: auto;
+  }
+
+  ::selection {
+    background: var(--wash);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid var(--link);
+    outline-offset: 3px;
+  }
+  /* The scrollbar is the one surface `cursor:none` cannot reach, so the native
+     arrow reappears over that strip on the right. Hiding it keeps the custom
+     cursor unbroken; wheel, trackpad and keyboard scrolling are unaffected. */
+  html {
+    scrollbar-width: none;
+  }
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  .icon {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ---------- fluid flow grid ---------- */
+  .field {
+    position: absolute;
+    top: 68px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw;
+    height: 620px;
+    z-index: 0;
+    pointer-events: none;
+    display: block;
+  }
+  /* The dot is z-index 0 and the LAST element in the body, so it paints over
+     everything else at that level (the grid canvas, the nav bar) but stays
+     under main and footer, where glyphs occlude it and the blue lens shows. */
+  header {
+    position: relative;
+    z-index: 0;
+  }
+  /* Deliberately NO z-index: positioned-but-auto means main does not open a
+     stacking context, so .dot-lens inside it can still paint above the dot. */
+  main,
+  footer {
+    position: relative;
+  }
+
+  /* ---------- nav ---------- */
+  /* Full-bleed: breaks out of the body gutter so the bar spans the viewport,
+     then re-applies the gutter as padding so content sits near the edges. */
+  header {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    padding-inline: var(--gut);
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    height: 68px;
+  }
+  .wordmark {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .mark {
+    width: 17px;
+    height: 17px;
+    flex: none;
+    position: relative;
+  }
+  .mark i {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--cobalt);
+    display: block;
+  }
+  .mark i:nth-child(1) {
+    left: 0;
+    top: 0;
+  }
+  .mark i:nth-child(2) {
+    right: 0;
+    bottom: 0;
+  }
+  .mark i:nth-child(3) {
+    right: 0;
+    top: 0;
+    background: var(--link);
+    opacity: 0.55;
+  }
+  .nav-links {
+    display: flex;
+    gap: 30px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  /* The bar is a pseudo-element rather than a border so showing it costs no
+     layout shift, and it scales on transform instead of animating width. */
+  .nav-links a {
+    position: relative;
+    display: block;
+    padding-block: 6px;
+    color: var(--fg-2);
+    transition: color 0.18s var(--ease-ui);
+  }
+  /* Invisible hit area much larger than the visible text; no neighbours up
+     here in the corner to worry about overlapping. */
+  .nav-links a::before {
+    content: "";
+    position: absolute;
+    inset: -28px -20px;
+  }
+  .nav-links a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: var(--cobalt);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s var(--ease-ui);
+  }
+  .nav-links a[aria-current="page"] {
+    color: var(--fg);
+  }
+  .nav-links a[aria-current="page"]::after {
+    transform: scaleX(1);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .nav-links a:hover {
+      color: var(--fg);
+    }
+    .nav-links a:hover::after {
+      transform: scaleX(1);
+    }
+  }
+
+  /* ---------- hero: asymmetric, and quiet ---------- */
+  .hero {
+    padding-top: clamp(56px, 7vw, 96px);
+    padding-bottom: clamp(220px, 26vw, 360px);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    gap: clamp(28px, 5vw, 80px);
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  }
+  .name {
+    font-size: clamp(34px, 6.2vw, 84px);
+    font-weight: 600;
+    letter-spacing: -0.045em;
+  }
+  .role {
+    margin-top: 14px;
+    font-size: clamp(13.5px, 1.3vw, 16px);
+    font-weight: 500;
+    color: var(--fg-2);
+    letter-spacing: -0.01em;
+  }
+  .intro {
+    color: var(--fg-2);
+    font-size: 14.5px;
+    line-height: 1.72;
+    padding-top: clamp(6px, 1.2vw, 18px);
+  }
+  .intro strong {
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  /* paired social links; wraps rather than squeezing on narrow screens */
+  .hero-actions {
+    margin-top: clamp(24px, 3vw, 36px);
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+  } /* exactly 2x the hit zones’ 24px inward reach, so they never overlap */
+  .btn-flat {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    height: 42px;
+    padding-inline: 18px;
+    background: var(--cobalt);
+    color: #fff;
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: transform 0.16s var(--ease-ui);
+  }
+  /* Invisible hit area larger than the button itself, so hover fires slightly
+     before the cursor arrives. Events on a pseudo-element count as events on
+     its owner, so :hover still resolves to the <a>. The 6px sides are exactly
+     half the 12px flex gap, so the two buttons' zones tile the space between
+     them without overlapping and stealing each other's hover. */
+  .btn-flat::after {
+    content: "";
+    position: absolute;
+    inset: -40px -24px;
+  }
+  .btn-flat:active {
+    transform: scale(0.97);
+  }
+  .btn-flat .icon {
+    width: 15px;
+    height: 15px;
+    transition: transform 0.28s var(--ease);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-flat:hover .icon {
+      transform: translate(2px, -2px);
+    }
+  }
+  /* Brand marks lead the label rather than trailing it, so they skip the
+     arrow nudge above. Must stay after that rule: equal specificity. */
+  .btn-social .icon {
+    width: 16px;
+    height: 16px;
+  }
+  .btn-social:hover .icon {
+    transform: none;
+  }
+
+  /* ---------- sections ---------- */
+  .block {
+    padding-top: clamp(96px, 11vw, 160px);
+  }
+  .sec-title {
+    font-size: clamp(21px, 2.8vw, 32px);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    margin-bottom: clamp(30px, 3.6vw, 46px);
+  }
+
+  /* experience: year-anchored ledger */
+  .ledger {
+    border-top: 1px solid var(--line);
+  }
+  .xp {
+    display: grid;
+    grid-template-columns: clamp(76px, 10vw, 124px) minmax(0, 1fr);
+    gap: clamp(20px, 3.6vw, 48px);
+    align-items: start;
+    padding-block: clamp(34px, 4.2vw, 50px);
+    border-bottom: 1px solid var(--line);
+  }
+  @media (max-width: 760px) {
+    .xp {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+  }
+  .xp-year {
+    font-size: clamp(19px, 1.9vw, 26px);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    color: var(--fg-3);
+    transition: color 0.3s var(--ease-ui);
+  }
+  .xp-span {
+    margin-top: 8px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    color: var(--fg-3);
+    text-transform: uppercase;
+  }
+  .xp-role {
+    font-size: clamp(15.5px, 1.5vw, 18px);
+    font-weight: 600;
+    letter-spacing: -0.022em;
+  }
+  .xp-org {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--fg-2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .xp-org .place {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--fg-3);
+  }
+  .xp-org a {
+    color: var(--fg-3);
+    display: inline-flex;
+    transition: color 0.2s var(--ease-ui);
+  }
+  .xp-body {
+    margin-top: 13px;
+    color: var(--fg-2);
+    font-size: 14.5px;
+    line-height: 1.75;
+    max-width: 64ch;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .xp:hover .xp-year {
+      color: var(--link);
+    }
+    .xp:hover .xp-org a {
+      color: var(--link);
+    }
+  }
+
+  /* toolkit */
+  .kit {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(16px, 2vw, 24px);
+    max-width: 76ch;
+  }
+  .kit-row {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr);
+    gap: clamp(16px, 2.6vw, 32px);
+    align-items: baseline;
+  }
+  @media (max-width: 640px) {
+    .kit-row {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+  }
+  .kit-k {
+    font-size: 13px;
+    color: var(--fg-3);
+  }
+  .kit-v {
+    font-size: 14.5px;
+    color: var(--fg);
+    line-height: 1.72;
+  }
+  .kit-v i {
+    font-style: normal;
+    color: var(--fg-3);
+    padding-inline: 9px;
+  }
+
+  /* contact */
+  .mail {
+    font-size: clamp(18px, 2.3vw, 26px);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    display: inline-block;
+    border-bottom: 1px solid var(--line-2);
+    padding-bottom: 5px;
+    transition:
+      color 0.22s var(--ease-ui),
+      border-color 0.22s var(--ease-ui);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .mail:hover {
+      color: var(--link);
+      border-bottom-color: var(--link);
+    }
+  }
+  .note {
+    margin-top: 22px;
+    color: var(--fg-2);
+    font-size: 14.5px;
+    line-height: 1.72;
+    max-width: 50ch;
+  }
+  .elsewhere {
+    margin-top: 30px;
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+  .elsewhere a {
+    font-size: 13px;
+    color: var(--fg-2);
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    transition: color 0.2s var(--ease-ui);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .elsewhere a:hover {
+      color: var(--fg);
+    }
+  }
+
+  footer {
+    margin-top: clamp(88px, 10vw, 140px);
+    padding-block: 24px 44px;
+    border-top: 1px solid var(--line);
+  }
+  .foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.02em;
+    color: var(--fg-3);
+  }
+
+  /* Sits above the dot (z-index 3), so within the clip circle you read blue
+     glyphs instead of the flat white disc. */
+  .dot-lens {
+    z-index: 4;
+  }
+  .dot-lens,
+  .dot-lens * {
+    color: var(--cobalt) !important;
+  }
+
+  .js [data-rv] {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  .js [data-rv].in {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.75s var(--ease),
+      transform 0.75s var(--ease);
+    transition-delay: var(--d, 0ms);
+  }
+  /* Scoped to :not(.force-motion) so the ?motion=on debug override reaches CSS
+     too, not just the script. Without this, the OS setting silently kills every
+     CSS transition on the page even when the JS animations are forced on. */
+  @media (prefers-reduced-motion: reduce) {
+    html:not(.force-motion) {
+      scroll-behavior: auto;
+    }
+    html.js:not(.force-motion) [data-rv] {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    html:not(.force-motion) .block-cta,
+    html:not(.force-motion) .block-cta .icon,
+    html:not(.force-motion) .nav-links a,
+    html:not(.force-motion) .nav-links a::after,
+    html:not(.force-motion) .mail {
+      transition: none;
+    }
+  }
+</style>
+
+<svg style="display: none" aria-hidden="true">
+  <symbol id="i-ur" viewBox="0 0 18 18">
+    <path d="M5.5 12.5 12.5 5.5" />
+    <path d="M6.5 5.5h6v6" />
+  </symbol>
+  <symbol id="i-gh" viewBox="0 0 18 18">
+    <path
+      d="M9 1.5a7.5 7.5 0 0 0-2.37 14.62c.37.07.51-.16.51-.36v-1.3c-2.09.45-2.53-1-2.53-1-.34-.87-.83-1.1-.83-1.1-.68-.47.05-.46.05-.46.75.05 1.15.77 1.15.77.67 1.15 1.76.82 2.19.63.07-.49.26-.82.48-1.01-1.67-.19-3.42-.84-3.42-3.72 0-.82.29-1.5.77-2.02-.08-.19-.34-.95.07-1.99 0 0 .63-.2 2.06.77a7.1 7.1 0 0 1 3.75 0c1.43-.97 2.06-.77 2.06-.77.41 1.04.15 1.8.07 1.99.48.52.77 1.2.77 2.02 0 2.89-1.76 3.53-3.43 3.71.27.23.51.69.51 1.39v2.06c0 .2.14.44.51.36A7.5 7.5 0 0 0 9 1.5Z"
+    />
+  </symbol>
+  <symbol id="i-li" viewBox="0 0 18 18">
+    <rect x="2" y="2" width="14" height="14" />
+    <path
+      d="M5.5 7.5v5M5.5 5.2v.1M8.8 12.5v-5M8.8 9.4c0-1 .7-1.6 1.7-1.6s1.7.6 1.7 1.9v2.8"
+    />
+  </symbol>
+</svg>
+
+<canvas class="field" id="field" aria-hidden="true"></canvas>
+
+<header>
+  <nav class="nav">
+    <a class="wordmark" href="./index.html">
+      <span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      Tharun
+    </a>
+    <ul class="nav-links">
+      <li><a href="./index.html" aria-current="page">Home</a></li>
+      <li><a href="./work.html">Work</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main class="shell">
+  <section class="hero">
+    <div class="hero-grid">
+      <h1 class="name magnetic">
+        Tharun.
+        <span class="role" style="display: block"
+          >Machine learning engineer &amp; designer.</span
+        >
+      </h1>
+      <p class="intro">
+        <strong>Most of my work is the unglamorous part.</strong> Figuring out
+        why a model that looked fine in evaluation falls over in production,
+        then writing it down clearly enough that the next person does not repeat
+        it. I care about the interface as much as the pipeline.
+      </p>
+    </div>
+
+    <div class="hero-actions">
+      <a class="btn-flat btn-social" href="#">
+        <svg class="icon"><use href="#i-gh" /></svg>
+        GitHub
+      </a>
+      <a class="btn-flat btn-social" href="#">
+        <svg class="icon"><use href="#i-li" /></svg>
+        LinkedIn
+      </a>
+    </div>
+  </section>
+
+  <section class="block" id="experience">
+    <h2 class="sec-title magnetic" data-rv>Experience</h2>
+    <div class="ledger">
+      <div class="xp" data-rv>
+        <div>
+          <div class="xp-year tnum">2026</div>
+          <div class="xp-span">Jun - Jul</div>
+        </div>
+        <div>
+          <div class="xp-role magnetic">AI R&amp;D Intern</div>
+          <div class="xp-org">
+            EasyWebinar
+            <span class="place">Hyderabad, India</span>
+            <a href="#" aria-label="Company site"
+              ><svg class="icon" style="width: 14px; height: 14px">
+                <use href="#i-ur" /></svg
+            ></a>
+          </div>
+          <p class="xp-body">
+            Designed AI avatar workflows and evaluated voice cloning models for
+            natural sounding speech. Established an end to end serverless video
+            generation pipeline combining digital avatars with synthesized audio
+            and precise lip syncing.
+          </p>
+        </div>
+      </div>
+
+      <div class="xp" data-rv style="--d: 70ms">
+        <div>
+          <div class="xp-year tnum">2026</div>
+          <div class="xp-span">Jan</div>
+        </div>
+        <div>
+          <div class="xp-role magnetic">Intellectual Property Intern</div>
+          <div class="xp-org">
+            Vknow Patent Services
+            <span class="place">Remote</span>
+          </div>
+          <p class="xp-body">
+            Gained hands-on exposure to patent searching and the technical
+            analysis of inventions. Explored the intersection of computer
+            science and intellectual property, and how software innovations are
+            legally safeguarded in practice.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="skills">
+    <h2 class="sec-title magnetic" data-rv>Toolkit</h2>
+    <div class="kit">
+      <div class="kit-row" data-rv>
+        <div class="kit-k">Languages</div>
+        <div class="kit-v">
+          Python <i>/</i> TypeScript <i>/</i> C++ <i>/</i> SQL
+        </div>
+      </div>
+      <div class="kit-row" data-rv style="--d: 60ms">
+        <div class="kit-k">Machine learning</div>
+        <div class="kit-v">
+          PyTorch <i>/</i> JAX <i>/</i> Transformers <i>/</i> scikit-learn
+        </div>
+      </div>
+      <div class="kit-row" data-rv style="--d: 120ms">
+        <div class="kit-k">Product</div>
+        <div class="kit-v">
+          Next.js <i>/</i> Tailwind <i>/</i> Postgres <i>/</i> Docker
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="contact">
+    <h2 class="sec-title magnetic" data-rv>Say hello</h2>
+    <div data-rv>
+      <a class="mail magnetic" href="#">tharunsden@gmail.com</a>
+      <p class="note">Open to new-grad ML roles.</p>
+      <div class="elsewhere">
+        <a href="#"
+          ><svg class="icon"><use href="#i-gh" /></svg> GitHub</a
+        >
+        <a href="#"
+          ><svg class="icon"><use href="#i-li" /></svg> LinkedIn</a
+        >
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="shell">
+  <div class="foot">
+    <span>Design preview &middot; placeholder content</span>
+    <span>Tharun</span>
+  </div>
+</footer>
+
+<div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+
+<script>
+  (function () {
+    // Motion is ON by default: this deliberately ignores the visitor's OS
+    // reduced-motion setting while the site is a design preview, so it does not
+    // need ?motion=on in every URL. ?motion=off honours the setting again.
+    // TODO: before this ships, flip the default back to the OS preference:
+    //   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var reduce = location.search.indexOf("motion=off") !== -1;
+
+    // How far the flow-grid's mouse-reactive push carries, in pixels.
+    var FIELD_REACH = 154;
+
+    // True while the cursor is over the field canvas, where the dot is hidden and
+    // the animation is the only cursor. The lens below reads this so it hides too:
+    // a blue circle with no dot attached to it reads as a stray artifact.
+    var overField = false;
+    // True once the pointer has left the window entirely, so the dot and lens
+    // park themselves instead of freezing mid-page.
+    var pointerGone = false;
+
+    /* ---------- custom cursor dot ----------
+     Hidden while over the field canvas, so only the animation shows the
+     cursor there. A plain white dot everywhere else. */
+    (function () {
+      var dot = document.getElementById("cursorDot");
+      var field = document.getElementById("field");
+      if (
+        !dot ||
+        !field ||
+        matchMedia("(hover:none), (pointer:coarse)").matches
+      )
+        return;
+
+      window.addEventListener("mousemove", function (e) {
+        pointerGone = false;
+        var r = field.getBoundingClientRect();
+        overField =
+          e.clientX >= r.left &&
+          e.clientX <= r.right &&
+          e.clientY >= r.top &&
+          e.clientY <= r.bottom;
+        // The buttons sit inside the field's box, so without this exception they
+        // would have no visible cursor at all on hover. Events on the ::after are
+        // attributed to the <a>, so this covers the invisible margin too.
+        var onBtn =
+          e.target && e.target.closest && e.target.closest(".btn-flat");
+        // ...and the ring opens a touch before it fully crosses the button's
+        // edge: at the edge itself (lead 0) about half the dot already
+        // overlaps, so a small outward lead fires it once only ~30% of the
+        // dot has crossed in instead of waiting for half.
+        var RING_LEAD = 3;
+        var onFace = false;
+        if (onBtn) {
+          var br = onBtn.getBoundingClientRect();
+          onFace =
+            e.clientX >= br.left - RING_LEAD &&
+            e.clientX <= br.right + RING_LEAD &&
+            e.clientY >= br.top - RING_LEAD &&
+            e.clientY <= br.bottom + RING_LEAD;
+        }
+
+        dot.classList.toggle("is-ring", !!onFace);
+        dot.style.opacity = overField && !onBtn ? "0" : "1";
+        dot.style.transform =
+          "translate(" +
+          e.clientX +
+          "px," +
+          e.clientY +
+          "px) translate(-50%,-50%)";
+      });
+
+      function park() {
+        pointerGone = true;
+        dot.style.opacity = "0";
+      }
+      // mouseleave on window is unreliable for viewport exits. A mouseout with no
+      // relatedTarget means the pointer left the document; blur covers alt-tab.
+      document.addEventListener("mouseout", function (e) {
+        if (!e.relatedTarget) park();
+      });
+      document.addEventListener("mouseleave", park);
+      window.addEventListener("blur", park);
+    })();
+
+    /* ---------- text seen through the dot ----------
+     A blue-colored duplicate of each .magnetic block sits exactly on top of
+     the original, but clip-path restricts it to a circle the same size as
+     the dot itself, centered on the cursor. So only the pixels the dot
+     physically covers show blue (glyph ink there reads blue, gaps between
+     letters reveal the white dot underneath); everything outside that tiny
+     circle is the untouched original text. No word- or letter-level color
+     swapping, so nothing but that exact footprint ever changes. */
+    (function () {
+      var blocks = document.querySelectorAll(".magnetic");
+      if (
+        !blocks.length ||
+        matchMedia("(hover:none), (pointer:coarse)").matches
+      )
+        return;
+
+      // The ring's inner radius: 54px outer less the 2px border, halved, so the
+      // blue fills exactly what the ring encircles.
+      var DOT_RADIUS = 13; // matches the cursor dot's own radius (26px / 2)
+      var lenses = [];
+      blocks.forEach(function (block) {
+        block.style.position = "relative";
+        var lens = block.cloneNode(true);
+        lens.className = block.className + " dot-lens";
+        lens.setAttribute("aria-hidden", "true");
+        // Headings carry data-rv; left on the clone, the reveal observer would
+        // pick it up and offset it by translateY(16px) out of sync with the
+        // original. Duplicated ids would be invalid markup too.
+        lens.removeAttribute("data-rv");
+        lens.removeAttribute("id");
+        lens.querySelectorAll("[data-rv], [id]").forEach(function (el) {
+          el.removeAttribute("data-rv");
+          el.removeAttribute("id");
+        });
+        lens.style.position = "absolute";
+        lens.style.inset = "0";
+        // The clone inherits the block's own margin, which an absolutely
+        // positioned box adds on top of `top:0`, dropping it below the original.
+        lens.style.margin = "0";
+        lens.style.pointerEvents = "none";
+        lens.style.userSelect = "none";
+        lens.style.clipPath = "circle(0px at -999px -999px)";
+        block.appendChild(lens);
+        lenses.push({ block: block, lens: lens });
+      });
+
+      var raf = null,
+        mx = -9999,
+        my = -9999;
+      function update() {
+        raf = null;
+        for (var i = 0; i < lenses.length; i++) {
+          if (overField || pointerGone) {
+            lenses[i].lens.style.clipPath = "circle(0px at -999px -999px)";
+            continue;
+          }
+          var r = lenses[i].block.getBoundingClientRect();
+          var lx = mx - r.left,
+            ly = my - r.top;
+          lenses[i].lens.style.clipPath =
+            "circle(" + DOT_RADIUS + "px at " + lx + "px " + ly + "px)";
+        }
+      }
+      window.addEventListener("mousemove", function (e) {
+        mx = e.clientX;
+        my = e.clientY;
+        if (!raf) raf = requestAnimationFrame(update);
+      });
+      // No mousemove arrives once the pointer is gone, so the lens needs its own
+      // nudge to park; otherwise it stays frozen where it was left.
+      function parkLens() {
+        if (!raf) raf = requestAnimationFrame(update);
+      }
+      document.addEventListener("mouseout", function (e) {
+        if (!e.relatedTarget) parkLens();
+      });
+      document.addEventListener("mouseleave", parkLens);
+      window.addEventListener("blur", parkLens);
+    })();
+
+    /* ---------- reveals ---------- */
+    var items = document.querySelectorAll("[data-rv]");
+    if (reduce || !("IntersectionObserver" in window)) {
+      items.forEach(function (el) {
+        el.classList.add("in");
+      });
+    } else {
+      var io = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) e.target.classList.add("in");
+            else e.target.classList.remove("in");
+          });
+        },
+        { threshold: 0.15, rootMargin: "0px 0px -5% 0px" },
+      );
+      items.forEach(function (el) {
+        io.observe(el);
+      });
+    }
+
+    /* ---------- fluid flow grid ----------
+     A grid of short vectors carrying a sine-based turbulence field. The
+     field bends away from the cursor within range, so the grid reads as
+     a fluid the pointer pushes through. Colors are the site's own blue
+     tokens (--cobalt / --link), not an imported palette. */
+    (function () {
+      var cv = document.getElementById("field");
+      if (!cv) return;
+      var ctx = cv.getContext("2d", { alpha: false });
+      if (!ctx) return;
+
+      var SPACING = 35,
+        REACH = FIELD_REACH;
+      var w = 0,
+        h = 0,
+        dpr = 1,
+        raf = 0,
+        running = false,
+        time = 0;
+      var mouse = { x: -1000, y: -1000, targetX: -1000, targetY: -1000 };
+
+      var FIELD_TOP = 68; // matches .field's CSS top, below the nav bar
+      var CLEARANCE = 12; // gap between the grid's end and the Experience heading
+      var GROW = 1.2; // push the grid past that line; 1 ends it right at the heading
+
+      // Sized off the Experience heading rather than hardcoded, since the hero's
+      // height moves with the viewport. GROW extends it past that line.
+      function fitHeight() {
+        var exp = document.getElementById("experience");
+        if (!exp) return;
+        var expTop = exp.getBoundingClientRect().top + window.scrollY;
+        var fieldH = Math.max(320, (expTop - CLEARANCE - FIELD_TOP) * GROW);
+        cv.style.height = fieldH + "px";
+      }
+
+      function size() {
+        fitHeight();
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        w = cv.clientWidth;
+        h = cv.clientHeight;
+        if (!w || !h) return;
+        cv.width = Math.round(w * dpr);
+        cv.height = Math.round(h * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      // Ignore the cursor once it leaves the canvas, so the push effect stops
+      // exactly at the grid's edge instead of reaching past it. That lets the
+      // white dot take over right at the boundary with no overlap between them.
+      function onMove(e) {
+        var r = cv.getBoundingClientRect();
+        if (
+          e.clientX < r.left ||
+          e.clientX > r.right ||
+          e.clientY < r.top ||
+          e.clientY > r.bottom
+        ) {
+          mouse.targetX = -1000;
+          mouse.targetY = -1000;
+          return;
+        }
+        mouse.targetX = e.clientX - r.left;
+        mouse.targetY = e.clientY - r.top;
+      }
+      function onLeave() {
+        mouse.targetX = -1000;
+        mouse.targetY = -1000;
+      }
+
+      function draw() {
+        if (!w || !h) return;
+        mouse.x += (mouse.targetX - mouse.x) * 0.08;
+        mouse.y += (mouse.targetY - mouse.y) * 0.08;
+
+        ctx.fillStyle = "#07070A";
+        ctx.fillRect(0, 0, w, h);
+        ctx.lineWidth = 1.2;
+
+        var cols = Math.ceil(w / SPACING) + 1;
+        var rows = Math.ceil(h / SPACING) + 1;
+
+        for (var i = 0; i < cols; i++) {
+          var x = i * SPACING;
+          for (var j = 0; j < rows; j++) {
+            var y = j * SPACING;
+
+            var angle = Math.sin(x * 0.003 + time) + Math.cos(y * 0.003 + time);
+
+            var dx = mouse.x - x,
+              dy = mouse.y - y;
+            var dist = Math.sqrt(dx * dx + dy * dy);
+            var isNear = false;
+            if (dist < REACH && dist > 0) {
+              isNear = true;
+              var pushAngle = Math.atan2(dy, dx) + Math.PI;
+              var force = 1 - dist / REACH;
+              angle = angle * (1 - force) + pushAngle * force;
+            }
+
+            var lineLen = isNear ? 22 : 14;
+            var x2 = x + Math.cos(angle) * lineLen;
+            var y2 = y + Math.sin(angle) * lineLen;
+            var a = isNear
+              ? 0.8
+              : 0.15 + Math.sin(x * 0.01 + y * 0.01 + time) * 0.1;
+
+            ctx.strokeStyle = "rgba(27,77,255," + a + ")";
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+          }
+        }
+      }
+
+      function frame() {
+        time += 0.008;
+        draw();
+        raf = requestAnimationFrame(frame);
+      }
+      function play() {
+        if (running || reduce) return;
+        running = true;
+        raf = requestAnimationFrame(frame);
+      }
+      function pause() {
+        if (!running) return;
+        running = false;
+        cancelAnimationFrame(raf);
+      }
+
+      size();
+      draw();
+      if (!reduce) {
+        play();
+        window.addEventListener("mousemove", onMove);
+        window.addEventListener("mouseleave", onLeave);
+        if ("IntersectionObserver" in window) {
+          new IntersectionObserver(
+            function (es) {
+              es[0].isIntersecting ? play() : pause();
+            },
+            { threshold: 0 },
+          ).observe(cv);
+        }
+        document.addEventListener("visibilitychange", function () {
+          document.hidden ? pause() : play();
+        });
+      }
+
+      var rt;
+      window.addEventListener("resize", function () {
+        clearTimeout(rt);
+        rt = setTimeout(function () {
+          size();
+          draw();
+        }, 150);
+      });
+    })();
+  })();
+</script>

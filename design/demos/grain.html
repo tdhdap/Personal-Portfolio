@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grain and drift - demo</title>
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ background:#07070A; height:100%; overflow:hidden; }
+  body{ font-family:ui-sans-serif, system-ui, sans-serif; }
+  canvas{ position:fixed; inset:0; display:block; }
+  .tag{
+    position:fixed; top:20px; left:20px; z-index:2; display:flex; align-items:center; gap:10px;
+    font-size:12.5px; color:#9A9AA4;
+  }
+  .tag a{ color:#5C86FF; text-decoration:none; border-bottom:1px solid rgba(92,134,255,.4); padding-bottom:2px; }
+  .tag a:hover{ color:#fff; border-color:#fff; }
+  .tag b{ color:#F2F2F4; font-weight:600; }
+  .hint{
+    position:fixed; bottom:20px; left:20px; z-index:2; font-family:ui-monospace,monospace;
+    font-size:11px; color:#61616B; max-width:340px; line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<div class="tag"><a href="./index.html">&larr; All demos</a><span>/</span><b>07 Grain &amp; drift</b></div>
+<div class="hint">Fine film grain plus an almost imperceptibly slow light drift. No cursor interaction, minimum motion.</div>
+<canvas id="c"></canvas>
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (location.search.indexOf('motion=on') !== -1) reduce = false;
+  if (location.search.indexOf('motion=off') !== -1) reduce = true;
+
+  var cv = document.getElementById('c');
+  var ctx = cv.getContext('2d');
+  var w, h, dpr;
+  var TILE = 128;
+  var noiseCanvas = document.createElement('canvas');
+  noiseCanvas.width = TILE; noiseCanvas.height = TILE;
+  var nctx = noiseCanvas.getContext('2d');
+
+  function size(){
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    w = innerWidth; h = innerHeight;
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function makeNoise(){
+    var img = nctx.createImageData(TILE, TILE);
+    for (var i = 0; i < img.data.length; i += 4){
+      var v = 255 * Math.random();
+      img.data[i] = v; img.data[i+1] = v; img.data[i+2] = v; img.data[i+3] = 14;
+    }
+    nctx.putImageData(img, 0, 0);
+  }
+
+  function draw(t){
+    ctx.fillStyle = '#07070A';
+    ctx.fillRect(0, 0, w, h);
+
+    var gx = w * 0.5 + Math.sin(t * 0.05) * w * 0.32;
+    var gy = h * 0.42 + Math.cos(t * 0.037) * h * 0.28;
+    var grad = ctx.createRadialGradient(gx, gy, 0, gx, gy, Math.max(w, h) * 0.55);
+    grad.addColorStop(0, 'rgba(27,77,255,0.16)');
+    grad.addColorStop(1, 'rgba(27,77,255,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    var pattern = ctx.createPattern(noiseCanvas, 'repeat');
+    ctx.save();
+    ctx.translate((t * 8) % TILE, (t * 5) % TILE);
+    ctx.fillStyle = pattern;
+    ctx.fillRect(-TILE, -TILE, w + TILE * 2, h + TILE * 2);
+    ctx.restore();
+  }
+
+  var raf, time = 0, frameCount = 0;
+  function frame(){
+    time += 0.016;
+    frameCount++;
+    if (frameCount % 4 === 0) makeNoise();
+    draw(time);
+    raf = requestAnimationFrame(frame);
+  }
+
+  size(); makeNoise(); draw(0);
+  if (!reduce){ raf = requestAnimationFrame(frame); }
+  addEventListener('resize', function(){ size(); draw(time); });
+})();
+</script>
+</body>
+</html>

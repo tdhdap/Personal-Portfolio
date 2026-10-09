@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gradient descent - demo</title>
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ background:#07070A; height:100%; overflow:hidden; }
+  body{ font-family:ui-sans-serif, system-ui, sans-serif; }
+  canvas{ position:fixed; inset:0; display:block; }
+  .tag{
+    position:fixed; top:20px; left:20px; z-index:2; display:flex; align-items:center; gap:10px;
+    font-size:12.5px; color:#9A9AA4;
+  }
+  .tag a{ color:#5C86FF; text-decoration:none; border-bottom:1px solid rgba(92,134,255,.4); padding-bottom:2px; }
+  .tag a:hover{ color:#fff; border-color:#fff; }
+  .tag b{ color:#F2F2F4; font-weight:600; }
+  .hint{
+    position:fixed; bottom:20px; left:20px; z-index:2; font-family:ui-monospace,monospace;
+    font-size:11px; color:#61616B; max-width:340px; line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<div class="tag"><a href="./index.html">&larr; All demos</a><span>/</span><b>03 Gradient descent</b></div>
+<div class="hint">Points walk downhill across a fixed loss landscape and respawn at the top when they settle. No cursor interaction.</div>
+<canvas id="c"></canvas>
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (location.search.indexOf('motion=on') !== -1) reduce = false;
+  if (location.search.indexOf('motion=off') !== -1) reduce = true;
+
+  var cv = document.getElementById('c');
+  var ctx = cv.getContext('2d');
+  var w, h, dpr, cell = 22, cols, rows, field;
+  var bowls = [];
+  var THRESHOLDS = [-2.6,-2.0,-1.4,-0.8,-0.2,0.4,1.0];
+
+  function size(){
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    w = innerWidth; h = innerHeight;
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cols = Math.ceil(w / cell) + 2;
+    rows = Math.ceil(h / cell) + 2;
+    field = new Float32Array(cols * rows);
+    bowls = [];
+    var n = 5;
+    for (var i = 0; i < n; i++){
+      bowls.push({
+        x: w * (0.12 + 0.76 * Math.random()),
+        y: h * (0.12 + 0.76 * Math.random()),
+        depth: 1.6 + Math.random() * 1.6,
+        r: 140 + Math.random() * 160
+      });
+    }
+  }
+
+  function heightAt(x, y, t){
+    var v = Math.sin(x * 0.0016 + t) * 0.25 + Math.cos(y * 0.0018 - t * 0.7) * 0.25;
+    for (var i = 0; i < bowls.length; i++){
+      var b = bowls[i];
+      var dx = x - b.x, dy = y - b.y;
+      v += -b.depth * Math.exp(-((dx * dx + dy * dy) / (2 * b.r * b.r)));
+    }
+    return v;
+  }
+
+  function computeField(t){
+    for (var j = 0; j < rows; j++){
+      var y = j * cell;
+      for (var i = 0; i < cols; i++){
+        field[j * cols + i] = heightAt(i * cell, y, t);
+      }
+    }
+  }
+
+  function lerp(a, b, thr){ var d = b - a; return d === 0 ? 0.5 : (thr - a) / d; }
+
+  function marchAll(){
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(27,77,255,0.34)';
+    ctx.beginPath();
+    for (var t = 0; t < THRESHOLDS.length; t++){
+      var thr = THRESHOLDS[t];
+      for (var j = 0; j < rows - 1; j++){
+        for (var i = 0; i < cols - 1; i++){
+          var tl = field[j * cols + i], tr = field[j * cols + i + 1];
+          var bl = field[(j + 1) * cols + i], br = field[(j + 1) * cols + i + 1];
+          var idx = 0;
+          if (tl > thr) idx |= 8;
+          if (tr > thr) idx |= 4;
+          if (br > thr) idx |= 2;
+          if (bl > thr) idx |= 1;
+          if (idx === 0 || idx === 15) continue;
+          var x0 = i * cell, y0 = j * cell;
+          var top = [x0 + lerp(tl, tr, thr) * cell, y0];
+          var right = [x0 + cell, y0 + lerp(tr, br, thr) * cell];
+          var bottom = [x0 + lerp(bl, br, thr) * cell, y0 + cell];
+          var left = [x0, y0 + lerp(tl, bl, thr) * cell];
+          var segs;
+          switch (idx){
+            case 1: segs = [left, bottom]; break;
+            case 2: segs = [bottom, right]; break;
+            case 3: segs = [left, right]; break;
+            case 4: segs = [top, right]; break;
+            case 5: segs = [top, left, bottom, right]; break;
+            case 6: segs = [top, bottom]; break;
+            case 7: segs = [left, top]; break;
+            case 8: segs = [left, top]; break;
+            case 9: segs = [top, bottom]; break;
+            case 10: segs = [top, right, left, bottom]; break;
+            case 11: segs = [top, right]; break;
+            case 12: segs = [left, right]; break;
+            case 13: segs = [bottom, right]; break;
+            case 14: segs = [left, bottom]; break;
+            default: segs = null;
+          }
+          if (!segs) continue;
+          for (var s = 0; s < segs.length; s += 2){
+            ctx.moveTo(segs[s][0], segs[s][1]);
+            ctx.lineTo(segs[s + 1][0], segs[s + 1][1]);
+          }
+        }
+      }
+    }
+    ctx.stroke();
+  }
+
+  function makeWalker(){
+    return {
+      x: Math.random() * w, y: Math.random() * h,
+      vx: 0, vy: 0, trail: [], age: 0
+    };
+  }
+  var walkers = [];
+
+  function stepWalker(p, t){
+    var eps = 3;
+    var h0 = heightAt(p.x, p.y, t);
+    var gx = (heightAt(p.x + eps, p.y, t) - h0) / eps;
+    var gy = (heightAt(p.x, p.y + eps, t) - h0) / eps;
+    p.vx = p.vx * 0.82 - gx * 40;
+    p.vy = p.vy * 0.82 - gy * 40;
+    p.x += p.vx; p.y += p.vy;
+    p.trail.push([p.x, p.y]);
+    if (p.trail.length > 50) p.trail.shift();
+    p.age++;
+    var speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+    if (p.age > 60 && speed < 0.05){
+      Object.assign(p, makeWalker());
+    }
+    if (p.age > 900){ Object.assign(p, makeWalker()); }
+  }
+
+  function drawWalker(p){
+    for (var i = 1; i < p.trail.length; i++){
+      var a = i / p.trail.length;
+      ctx.strokeStyle = 'rgba(92,134,255,' + (a * 0.5) + ')';
+      ctx.lineWidth = 1 + a * 1.5;
+      ctx.beginPath();
+      ctx.moveTo(p.trail[i - 1][0], p.trail[i - 1][1]);
+      ctx.lineTo(p.trail[i][0], p.trail[i][1]);
+      ctx.stroke();
+    }
+    ctx.fillStyle = '#5C86FF';
+    ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI * 2); ctx.fill();
+  }
+
+  var raf, time = 0;
+  function frame(){
+    time += 0.006;
+    ctx.fillStyle = '#07070A';
+    ctx.fillRect(0, 0, w, h);
+    computeField(time);
+    marchAll();
+    for (var i = 0; i < walkers.length; i++){ stepWalker(walkers[i], time); drawWalker(walkers[i]); }
+    raf = requestAnimationFrame(frame);
+  }
+
+  size();
+  walkers = [makeWalker(), makeWalker(), makeWalker(), makeWalker()];
+  computeField(0);
+  ctx.fillStyle = '#07070A'; ctx.fillRect(0, 0, w, h);
+  marchAll();
+  walkers.forEach(drawWalker);
+
+  if (!reduce){ raf = requestAnimationFrame(frame); }
+  addEventListener('resize', function(){
+    size(); computeField(time);
+    ctx.fillStyle = '#07070A'; ctx.fillRect(0,0,w,h);
+    marchAll(); walkers.forEach(drawWalker);
+  });
+})();
+</script>
+</body>
+</html>

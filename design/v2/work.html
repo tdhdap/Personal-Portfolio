@@ -1,0 +1,1163 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#07070a" />
+<meta name="color-scheme" content="dark" />
+<title>Work - Tharun</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+  rel="stylesheet"
+/>
+<script>
+  document.documentElement.classList.add("js");
+  // Motion is ON by default while this is a design preview, so the CSS
+  // reduced-motion block is disarmed unless ?motion=off asks for it back.
+  if (location.search.indexOf("motion=off") === -1)
+    document.documentElement.classList.add("force-motion");
+</script>
+<script src="./page-swap.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.css"
+/>
+<script
+  src="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js"
+  defer
+></script>
+<script src="./smooth-scroll.js" defer></script>
+<style id="page-style">
+  /* Lenis eases the scroll itself; native smooth scrolling on top of it
+     makes every programmatic jump double-ease. */
+  html.lenis {
+    scroll-behavior: auto;
+  }
+  /* Opts into cross-document view transitions (Chromium), matching the home
+     page: keeps the old page rendered (cursor:none intact) through
+     navigation instead of a blank frame where the OS pointer flashes. */
+  @view-transition {
+    navigation: auto;
+  }
+  :root {
+    --bg: #07070a;
+    --fg: #f2f2f4;
+    --fg-2: #9a9aa4;
+    --fg-3: #61616b;
+    --line: rgba(255, 255, 255, 0.09);
+    --line-2: rgba(255, 255, 255, 0.16);
+    --accent: #5c86ff;
+    --accent-wash: rgba(27, 77, 255, 0.16);
+    --cobalt: #1b4dff;
+    --cobalt-hi: #3b66ff;
+    --sans: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-ui: cubic-bezier(0.23, 1, 0.32, 1);
+    --shell: 1280px;
+    --gut: clamp(20px, 4vw, 56px);
+  }
+
+  * {
+    box-sizing: border-box;
+    border-radius: 0;
+    cursor: none;
+  }
+
+  /* A small filled dot, matching the home page, opening into a ring over
+     Home/Work. No other buttons on this page. */
+  .cursor-dot {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid transparent;
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0; /* above all content */
+    transform: translate(-1000px, -1000px);
+    transition:
+      opacity 0.15s ease,
+      width 0.22s var(--ease-ui),
+      height 0.22s var(--ease-ui),
+      background-color 0.18s var(--ease-ui),
+      border-color 0.18s var(--ease-ui),
+      border-width 0.22s var(--ease-ui);
+  }
+  /* Over anything worth clicking the dot grows. It stays a filled white disc:
+     the signal is its size, and what the lens below does to the text inside
+     it -- not an outline. */
+  .cursor-dot.is-ring {
+    width: 56px;
+    height: 56px;
+    background: #fff;
+    border-width: 0;
+  }
+  /* Sits above the dot (z-index 3), so within the clip circle you read blue
+     glyphs instead of the flat white disc. */
+  /* One layer for every copy the cursor draws, above the dot and out of the
+     way of the page's own stacking. */
+  .lens-host {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .dot-lens {
+    pointer-events: none;
+  }
+  /* A nav link's bar is drawn by a rule that reaches it through .nav-links,
+     which the copy is no longer inside: it carries .nav-link instead, and this
+     redraws the same bar on it. */
+  .dot-lens.nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: #000;
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  .dot-lens.nav-link.is-near::after,
+  .dot-lens.nav-link[aria-current="page"]::after {
+    transform: scaleX(1);
+  }
+  /* The resting grey line is a faint white, which vanishes on the white dot;
+     inside it, it reads as a faint black instead. */
+  .dot-lens.mail::before,
+  .dot-lens.lk::before,
+  .dot-lens.cert-more::before {
+    background: rgba(0, 0, 0, 0.4) !important;
+  }
+  /* Every bar reads black inside the dot, the same as the text. Scoped to the
+     links that have one: .btn-flat's ::after is its invisible hit zone, and
+     colouring that would paint a slab behind the button. */
+  .dot-lens.mail::after,
+  .dot-lens.lk::after,
+  .dot-lens.cert-more::after {
+    background: #000 !important;
+  }
+  /* Text under the dot goes black -- the dot is white, so this reads as the
+     text inverting inside it. */
+  .dot-lens,
+  .dot-lens * {
+    color: #000 !important;
+  }
+  .dot-lens {
+    background: none !important;
+  }
+  /* Inside the dot everything cobalt reads black: a button's face, and the
+     bar under a link. The button is still a swap rather than an inversion --
+     hovering turns it white with cobalt text, and inside the dot it goes to
+     black with white text. */
+  .btn-flat.dot-lens {
+    background: #000 !important;
+  }
+  .btn-flat.dot-lens,
+  .btn-flat.dot-lens * {
+    color: #fff !important;
+  }
+  .mail .dot-lens::after,
+  .lk .dot-lens::after,
+  .cert-more .dot-lens::after,
+  .nav-links a .dot-lens::after {
+    background: #000 !important;
+  }
+  @media (hover: none) and (pointer: coarse) {
+    * {
+      cursor: auto;
+    }
+    .cursor-dot {
+      display: none;
+    }
+  }
+  /* The whole page renders at 90% of its written size, which is how it was
+     drawn: the type, spacing and images were all judged with the browser at
+     90% zoom, so this is what 100% zoom should look like. Everything scales
+     together -- there is no second set of sizes to keep in step. The one
+     thing that needs to know about it is the cursor script, which positions
+     the dot from pointer coordinates: those arrive unscaled, so it divides by
+     this number. */
+  :root {
+    --page-zoom: 0.9;
+    /* The window's real width and height, in the page's own scaled units:
+       viewport units do not know about the zoom above, so anything measured
+       against the window has to be divided by it or it falls short. */
+    --vw: calc(100vw / var(--page-zoom));
+    --vh: calc(100vh / var(--page-zoom));
+  }
+  html {
+    zoom: var(--page-zoom);
+    background: var(--bg);
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    padding-inline: var(--gut);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: -0.04em;
+  }
+  p {
+    margin: 0;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .shell {
+    max-width: var(--shell);
+    margin-inline: auto;
+  }
+
+  ::selection {
+    background: var(--accent-wash);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+  /* The scrollbar is the one surface `cursor:none` cannot reach, so the native
+     arrow reappears over that strip on the right. Hiding it keeps the custom
+     cursor unbroken; wheel, trackpad and keyboard scrolling are unaffected. */
+  html {
+    scrollbar-width: none;
+  }
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  .icon {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* The dot is z-index 0 and last in the body, so it stays under main and
+     footer, where glyphs occlude it and the blue lens shows through. */
+  /* Deliberately NO z-index: positioned-but-auto means main does not open a
+     stacking context, so .dot-lens inside it can still paint above the dot. */
+  main,
+  footer {
+    position: relative;
+  }
+
+  /* Page transition, driven by page-swap.js: the old page lifts a step and
+     fades, the new one rises into its place. Matches the home page. */
+  main,
+  footer,
+  .field {
+    transition:
+      opacity 260ms var(--ease-ui),
+      translate 260ms var(--ease-ui);
+  }
+  main.is-leaving,
+  footer.is-leaving,
+  .field.is-leaving {
+    opacity: 0;
+    translate: 0 -8px;
+    transition-duration: 140ms;
+  }
+  .field.is-leaving,
+  .field.is-entering {
+    animation: none;
+  }
+  main.is-entering,
+  footer.is-entering,
+  .field.is-entering {
+    opacity: 0;
+    translate: 0 10px;
+    transition: none;
+  }
+
+  /* ---------- nav ----------
+     No bar, no wordmark: the two links float in the top-right. z-index 2 keeps
+     them clear of main as it scrolls underneath. */
+  .nav-fixed {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 2;
+    padding: 26px var(--gut);
+    pointer-events: none; /* only the links themselves are clickable */
+  }
+  .nav-fixed .nav-links {
+    pointer-events: auto;
+  }
+  .nav-links {
+    display: flex;
+    gap: 30px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  /* The bar is a pseudo-element rather than a border so showing it costs no
+     layout shift, and it scales on transform instead of animating width.
+     Both links stay white; the bar alone carries hover and active state. */
+  .nav-links a {
+    position: relative;
+    display: block;
+    padding-block: 6px;
+    color: var(--fg);
+  }
+  /* Invisible hit area much larger than the visible text; no neighbours up
+     here in the corner to worry about overlapping. */
+  .nav-links a::before {
+    content: "";
+    position: absolute;
+    inset: -45px -35px;
+  }
+  .nav-links a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: var(--cobalt);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s var(--ease-ui);
+  }
+  .nav-links a[aria-current="page"]::after {
+    transform: scaleX(1);
+  }
+  /* Driven by JS (the same onFace check that opens the ring), not :hover:
+     with the enlarged ::before hit area, :hover fired well before the ring
+     did, showing the bar with no ring to go with it. */
+  .nav-links a.is-near::after {
+    transform: scaleX(1);
+  }
+
+  /* ---------- page head ---------- */
+  /* Absorbs the 69px the removed nav bar used to contribute. */
+  /* Same top edge as the home page's name, so the big title doesn't jump
+     between pages: home's hero padding, less the 28px the name is lifted by
+     (--name-lift there). */
+  .head {
+    padding-top: calc(clamp(125px, 13vw, 165px) - 28px);
+    padding-bottom: clamp(28px, 3.2vw, 44px);
+  }
+  .page-title {
+    font-weight: 600;
+    font-size: clamp(34px, 6vw, 76px);
+    line-height: 1;
+    letter-spacing: -0.045em;
+  }
+  /* The page's one static accent: the title's full stop, in the button blue. */
+  .page-title .dot {
+    color: var(--cobalt);
+  }
+  .page-sub {
+    margin-top: 18px;
+    max-width: 56ch;
+    color: var(--fg-2);
+    font-size: 16.5px;
+    line-height: 1.72;
+  }
+
+  /* ---------- project list: no cards, hairline separated ---------- */
+  .list {
+    border-top: 1px solid var(--line);
+  }
+  .item {
+    padding-block: clamp(40px, 5.4vw, 60px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .item-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .item-name {
+    font-size: clamp(19px, 1.9vw, 24px);
+    font-weight: 600;
+    letter-spacing: -0.022em;
+  }
+  .item-year {
+    font-family: var(--mono);
+    font-size: 13.5px;
+    color: var(--fg-3);
+  }
+  .item-body {
+    margin-top: 12px;
+    color: var(--fg-2);
+    font-size: 17.5px;
+    line-height: 1.75;
+    max-width: 64ch;
+  }
+
+  .stack {
+    margin-top: 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .stack span {
+    font-family: var(--mono);
+    font-size: 13.5px;
+    color: var(--fg-3);
+    letter-spacing: 0.03em;
+  }
+  .stack span:not(:last-child)::after {
+    content: "/";
+    margin-left: 8px;
+    color: var(--line-2);
+  }
+
+  .links {
+    margin-top: 26px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .lk {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    /* Set like the role headings above them -- same weight, same tight
+       tracking, no uppercase -- rather than as small tracked-out labels. */
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    color: var(--fg);
+    padding-bottom: 7px; /* 4px gap + the 3px line */
+    position: relative; /* anchors the blue bar */
+  }
+  .lk .icon {
+    width: 15px;
+    height: 15px;
+  }
+  /* Same hover as the home page's links: no colour change, a cobalt bar
+     scaling in from the left, in step with the cursor's white ring. */
+  /* The resting grey line: the same box as the blue bar drawn over it (a
+     border would be rounded to whole device pixels under the page zoom and
+     come out thinner than the bar), so hover changes only its colour. */
+  .lk::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: var(--line-2);
+  }
+  .lk::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: var(--cobalt);
+    transform: scaleX(0);
+    transform-origin: left;
+    /* Quick, because the other half of this hover -- the text inverting
+       inside the cursor -- is instant. */
+    transition: transform 0.16s var(--ease-ui);
+  }
+  .lk.is-ringed::after {
+    transform: scaleX(1);
+  }
+
+  /* right column: quiet metadata, no box */
+  /* No footer: the page simply ends a short breath after the last section. */
+  main {
+    padding-bottom: clamp(64px, 7vw, 96px);
+  }
+
+  /* Scoped to :not(.force-motion) so ?motion=on reaches CSS, not just scripts. */
+  @media (prefers-reduced-motion: reduce) {
+    html:not(.force-motion) {
+      scroll-behavior: auto;
+    }
+    html:not(.force-motion) .nav-links a,
+    html:not(.force-motion) .nav-links a::after,
+    html:not(.force-motion) .lk::after {
+      transition: none;
+    }
+    /* Page transition keeps its fade (it bridges the swap) but drops the lift. */
+    html:not(.force-motion) main.is-leaving,
+    html:not(.force-motion) footer.is-leaving,
+    html:not(.force-motion) main.is-entering,
+    html:not(.force-motion) footer.is-entering {
+      translate: none;
+    }
+  }
+  /* ---------- phones and touch ---------- */
+  /* On a narrow screen the text column runs the full width, so copy scrolls
+     straight under Home/Work. A scrim behind the links fades in over the
+     first stretch of scroll (at the very top the hero shows through
+     untouched) and fades out downward so it has no hard edge. */
+  @media (max-width: 900px) {
+    .nav-fixed {
+      left: 0;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .nav-fixed::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 -18px;
+      z-index: -1;
+      background: linear-gradient(
+        to bottom,
+        var(--bg) 0%,
+        var(--bg) 58%,
+        rgba(7, 7, 10, 0)
+      );
+    }
+    @supports (animation-timeline: scroll()) {
+      .nav-fixed::before {
+        animation: nav-scrim linear both;
+        animation-timeline: scroll(root);
+        animation-range: 0 140px;
+      }
+      @keyframes nav-scrim {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    }
+  }
+  @media (max-width: 640px) {
+    .nav-links {
+      font-size: 13.5px;
+    }
+  }
+  /* No hover on touch: the cursor-driven bars never fire, so a tap shows the
+     link's bar instead, in place of the browser's grey tap flash. The larger
+     tap areas are padding paid back with an equal negative margin, so nothing
+     on the page moves. */
+  @media (hover: none), (pointer: coarse) {
+    a,
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+    .lk {
+      padding-top: 12px;
+      margin-top: -12px;
+    }
+    .lk:active::after,
+    .nav-links a:active::after {
+      transform: scaleX(1);
+      transition-duration: 0s;
+    }
+  }
+</style>
+
+<svg style="display: none" aria-hidden="true">
+  <symbol id="i-ur" viewBox="0 0 18 18">
+    <path d="M6 12 12 6" />
+    <path d="M7 6h5v5" />
+  </symbol>
+  <!-- Play triangle, for a project with a recording to watch. -->
+  <symbol id="i-play" viewBox="0 0 18 18">
+    <path d="M6.75 4.5 13 9l-6.25 4.5Z" />
+  </symbol>
+  <symbol id="i-code" viewBox="0 0 18 18">
+    <path d="M6.5 12.5 3 9l3.5-3.5" />
+    <path d="M11.5 5.5 15 9l-3.5 3.5" />
+  </symbol>
+  <!-- A slide on its stand, for a project presented as a deck. -->
+  <symbol id="i-slides" viewBox="0 0 18 18">
+    <path d="M2.5 3.5h13v8.5h-13z" />
+    <path d="M9 12v3M6.5 15.5h5" />
+  </symbol>
+  <symbol id="i-doc" viewBox="0 0 18 18">
+    <path d="M4.5 2.5h6l3 3v10h-9z" />
+    <path d="M10.5 2.5v3h3" />
+  </symbol>
+</svg>
+
+<nav class="nav-fixed">
+  <ul class="nav-links">
+    <li><a class="nav-link" href="./index-attention.html">Home</a></li>
+    <li>
+      <a class="nav-link" href="./work.html" aria-current="page">Work</a>
+    </li>
+  </ul>
+</nav>
+
+<main class="shell">
+  <section class="head">
+    <h1 class="page-title magnetic">Work<span class="dot">.</span></h1>
+    <p class="page-sub">
+      A collection of things I&#39;ve built across different domains.
+    </p>
+  </section>
+
+  <div class="list">
+    <!-- Descriptions, years and hrefs are placeholders: fill each with one or
+         two lines on what it does and why it exists, and the real URLs. -->
+
+    <article class="item">
+      <div>
+        <div class="item-top">
+          <h2 class="item-name magnetic">Predicting Backdoor Recovery Cost in Vision-Language Models</h2>
+          <span class="item-year tnum">&mdash;</span>
+        </div>
+        <p class="item-body">
+          Investigated whether ASR-G can predict the cost of removing backdoors from large vision-language models. Using BLIP-2, the study evaluates 20 backdoored models across 120 recovery experiments and finds that recovery cost rises sharply with ASR-G, providing a basis for choosing between targeted repair and full retraining.
+        </p>
+        <div class="links">
+          <a
+            class="lk"
+            href="https://github.com/tdhdap/Predicting-Backdoor-Recovery-Cost-from-ASR-G-in-Large-Vision-Language-Models/blob/main/paper.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Paper <svg class="icon"><use href="#i-doc" /></svg
+          ></a>
+          <a
+            class="lk"
+            href="https://github.com/tdhdap/Predicting-Backdoor-Recovery-Cost-from-ASR-G-in-Large-Vision-Language-Models"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Code <svg class="icon"><use href="#i-code" /></svg
+          ></a>
+        </div>
+      </div>
+    </article>
+
+    <article class="item">
+      <div>
+        <div class="item-top">
+          <h2 class="item-name magnetic">
+            HR Analytics: Attrition & Salary Prediction
+          </h2>
+          <span class="item-year tnum">&mdash;</span>
+        </div>
+        <p class="item-body">
+          Developed a dual-objective machine learning framework with the IBM HR
+          Analytics dataset to forecast employee attrition and model future
+          compensation growth. By synthesizing attrition probability with salary
+          projections, the model calculates an "Expected Salary Loss" metric,
+          empowering organizations to identify high-value, at-risk talent and
+          prioritize retention strategies.
+        </p>
+        <div class="links">
+          <a class="lk" href="https://github.com/tdhdap/Predicting-Employee-Attrition-and-Salary-Using-Machine-Learning/blob/main/Predicting-Employee-Attrition-and-Salary-Using-Machine-Learning-Report.pdf"
+          target="_blank"
+            >Report<svg class="icon"><use href="#i-doc" /></svg
+          ></a>
+        </div>
+      </div>
+    </article>
+
+    <article class="item">
+      <div>
+        <div class="item-top">
+          <h2 class="item-name magnetic">Lightweight PDE Image Denoiser</h2>
+          <span class="item-year tnum">&mdash;</span>
+        </div>
+        <p class="item-body">
+          Developed a physics-constrained PDE model in PyTorch to filter Poisson
+          noise from digital images using a mathematics based architecture. By
+          replacing dense convolutions with geometric finite-differences, this
+          lightweight approach reduces trainable parameters by 97.6% reducing
+          training time from hours to minutes while preventing visual artifacts
+          and maintaining competitive quality.
+        </p>
+        <div class="links">
+          <a class="lk" href="https://github.com/tdhdap/Lightweight-PDE-Model-For-Poisson-Denoising/blob/main/Mathematical%20Image%20Processing/Lightweight%20PDE%20Model%20For%20Poisson%20Denoising%20(2).pdf"
+          target="blank"
+            >Paper <svg class="icon"><use href="#i-doc" /></svg
+          ></a>
+          <a class="lk" href="https://github.com/tdhdap/Lightweight-PDE-Model-For-Poisson-Denoising"
+           target="blank" 
+          >Code <svg class="icon"><use href="#i-code" /></svg
+          ></a>
+        </div>
+      </div>
+    </article>
+
+    <article class="item">
+      <div>
+        <div class="item-top">
+          <h2 class="item-name magnetic">Agentic Code Refactoring Tool</h2>
+          <span class="item-year tnum">&mdash;</span>
+        </div>
+        <p class="item-body">
+          Co-developed a VS Code plugin and web application using Crew AI and
+          the Claude LLM to intelligently analyze and refactor complex code. The
+          agentic AI framework reasons through verbose syntax to suggest
+          meaningful simplifications for developers.
+        </p>
+        <div class="links">
+          <a class="lk" href="#"
+            >Live <svg class="icon"><use href="#i-ur" /></svg
+          ></a>
+          <a class="lk" href="#"
+            >Code <svg class="icon"><use href="#i-code" /></svg
+          ></a>
+        </div>
+      </div>
+    </article>
+
+    <article class="item">
+      <div>
+        <div class="item-top">
+          <h2 class="item-name magnetic">
+            Satellite Imagery Risk Detection Pipeline
+          </h2>
+          <span class="item-year tnum">&mdash;</span>
+        </div>
+        <p class="item-body">
+          Developed a deep-learning pipeline to automate power line inspections
+          by identifying vegetation encroachment from Sentinel-2 satellite
+          imagery. By combining pretrained models with corridor locations and
+          bi-temporal vegetation-change signals, the packaged tool classifies
+          risk with high accuracy (AUC 0.79, F1 0.83) on unseen regions. The
+          main goal is to inform power line companies, and warn them of
+          potential harm to their powerlines caused by encroachment.
+        </p>
+        <div class="links">
+          <a class="lk" href="#"
+            >Live <svg class="icon"><use href="#i-ur" /></svg
+          ></a>
+          <a class="lk" href="#"
+            >Code <svg class="icon"><use href="#i-code" /></svg
+          ></a>
+        </div>
+      </div>
+    </article>
+
+    
+
+    <article class="item">
+      <div>
+        <div class="item-top">
+          <h2 class="item-name magnetic">
+            Comparative-Study-ANN-vs-CNN-Architecture
+          </h2>
+          <span class="item-year tnum">&mdash;</span>
+        </div>
+        <p class="item-body">
+          A comprehensive deep learning study focused on classifying Alzheimer's
+          disease stages from MRI scans. This project involved implementing and
+          benchmarking a standard Artificial Neural Network (ANN) against modern
+          CNN architectures such as LeNet, AlexNet, ZFNet, VGGNet, GoogLeNet,
+          and ResNet to evaluate and compare their diagnostic performance across
+          key evaluation metrics.
+        </p>
+        <div class="links">
+          <a
+            class="lk"
+            href="https://github.com/tdhdap/Comparative-Study-ANN-vs-CNN-Architecture"
+            target="_blank"
+            rel="noopener noreferrer">Code <svg class="icon"><use href="#i-code" /></svg
+          ></a>
+          <a
+            class="lk"
+            href="https://docs.google.com/presentation/d/1S-hXTNHCM72u54FIt4dh56Ju1i4FDkIV/edit?usp=sharing&amp;ouid=105849938544856827410&amp;rtpof=true&amp;sd=true"
+            target="_blank"
+            rel="noopener noreferrer"
+            >PPT <svg class="icon"><use href="#i-slides" /></svg
+          ></a>
+        </div>
+      </div>
+    </article>
+
+    <article class="item">
+      <div>
+        <div class="item-top">
+          <h2 class="item-name magnetic">Auction Platform</h2>
+          <span class="item-year tnum">&mdash;</span>
+        </div>
+        <p class="item-body">
+          Designed and developed a full-stack web application that facilitates real-time online bidding. Built with a responsive React frontend and a robust backend (using Node.js/FastAPI) to handle user authentication, live bid tracking, and seamless database management.
+        </p>
+        <div class="links">
+          <a
+            class="lk"
+            href="https://github.com/tdhdap/Auction-Platform"
+            target="_blank"
+            rel="noopener noreferrer">Code <svg class="icon"><use href="#i-code" /></svg
+          ></a>
+          <a
+            class="lk"
+            href="https://drive.google.com/file/d/1TJCaYbSeWYNlk07E6-Fg3ACax_0ZS_Ra/view"
+            target="_blank"
+            rel="noopener noreferrer">Demo <svg class="icon"><use href="#i-play" /></svg
+          ></a>
+        </div>
+      </div>
+      </div>
+    </article>
+  </div>
+</main>
+
+
+<div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+
+<script>
+  (function () {
+    // True once the pointer has left the window entirely. Both the dot and the
+    // lens park themselves on it, so neither is left frozen mid-page.
+    var pointerGone = false;
+
+    /* ---------- custom cursor dot ----------
+     No field canvas on this page, so the dot is simply always visible.
+     Listeners are named and unregistered via a cleanup callback because
+     page-swap.js re-runs this whole script on every Home/Work swap instead
+     of a real page load; without removing the old ones first, each swap
+     would pile on another listener still pointing at the previous page's
+     (now detached) dot. */
+    (function () {
+      var dot = document.getElementById("cursorDot");
+      // The page is rendered at --page-zoom, so a transform set inside it is
+      // scaled by that too, while pointer coordinates are not. Divide, or the
+      // dot trails the pointer by a tenth of the distance from the corner.
+      var ZOOM =
+        parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            "--page-zoom",
+          ),
+        ) || 1;
+      if (!dot || matchMedia("(hover:none), (pointer:coarse)").matches) return;
+      // The link currently showing its underline bar, if any. Kept in sync
+      // with the exact same onFace check that opens the ring, so the bar can
+      // never show without the ring (that mismatch is what native :hover was
+      // causing, since the link's big invisible ::before hit zone made :hover
+      // fire well before onFace did).
+      var activeNav = null;
+      // The Live/Code link currently showing its blue bar, if any.
+      var activeLk = null;
+      var lastX = 0,
+        lastY = 0,
+        hasPos = false,
+        scrollQueued = false;
+      function onMove(e) {
+        pointerGone = false;
+        lastX = e.clientX;
+        lastY = e.clientY;
+        hasPos = true;
+        // Home/Work show the ring only, never the dot. The dot is already
+        // visible everywhere on this page, so this is a normal animated
+        // dot-to-ring morph, unlike the instant jump on the field pages.
+        //
+        // The ring itself keys off the link's own real bounding box (plus a
+        // small lead) rather than e.target.closest('.nav-fixed'): that boolean
+        // goes true the instant the pointer enters the link's large invisible
+        // ::before hit zone, which reads as the ring opening far too early.
+        var link =
+          e.target && e.target.closest && e.target.closest(".nav-links a");
+        var onFace = false;
+        if (link) {
+          var br = link.getBoundingClientRect();
+          var LEAD = 6;
+          onFace =
+            e.clientX >= br.left - LEAD &&
+            e.clientX <= br.right + LEAD &&
+            e.clientY >= br.top - LEAD &&
+            e.clientY <= br.bottom + LEAD;
+        }
+        // The ring should stay open while crossing the gap between Home and
+        // Work, not close back to a dot and reopen a moment later. So it also
+        // stays on inside the union of both links' rects (bar detection above
+        // is unaffected: that one still needs to be over a specific link).
+        var navLinks = document.querySelectorAll(".nav-links a");
+        var inNavRow = false;
+        if (navLinks.length) {
+          var rowLeft = Infinity,
+            rowRight = -Infinity,
+            rowTop = Infinity,
+            rowBottom = -Infinity;
+          for (var ni = 0; ni < navLinks.length; ni++) {
+            var nr = navLinks[ni].getBoundingClientRect();
+            rowLeft = Math.min(rowLeft, nr.left);
+            rowRight = Math.max(rowRight, nr.right);
+            rowTop = Math.min(rowTop, nr.top);
+            rowBottom = Math.max(rowBottom, nr.bottom);
+          }
+          inNavRow =
+            e.clientX >= rowLeft &&
+            e.clientX <= rowRight &&
+            e.clientY >= rowTop &&
+            e.clientY <= rowBottom;
+        }
+        // Live/Code links get the same pair as the home page: the white ring
+        // and their blue bar, both on this one check.
+        var lk =
+          (e.target && e.target.closest && e.target.closest(".lk")) || null;
+
+        // The row check is what keeps the field from pulling; the dot's own
+        // growth uses the per-link check below it, so it swells on the word
+        // rather than anywhere along the nav's strip.
+        dot.classList.toggle("is-ring", onFace || !!lk);
+        dot.style.opacity = "1";
+        dot.style.transform =
+          "translate(" +
+          e.clientX / ZOOM +
+          "px," +
+          e.clientY / ZOOM +
+          "px) translate(-50%,-50%)";
+
+        var nextNav = onFace ? link : null;
+        if (activeNav !== nextNav) {
+          if (activeNav) activeNav.classList.remove("is-near");
+          if (nextNav) nextNav.classList.add("is-near");
+          activeNav = nextNav;
+        }
+        if (activeLk !== lk) {
+          if (activeLk) activeLk.classList.remove("is-ringed");
+          if (lk) lk.classList.add("is-ringed");
+          activeLk = lk;
+        }
+      }
+
+      function park() {
+        pointerGone = true;
+        dot.style.opacity = "0";
+        if (activeNav) {
+          activeNav.classList.remove("is-near");
+          activeNav = null;
+        }
+        if (activeLk) {
+          activeLk.classList.remove("is-ringed");
+          activeLk = null;
+        }
+      }
+      // mouseleave on window is unreliable for viewport exits. A mouseout with no
+      // relatedTarget means the pointer left the document; blur covers alt-tab and
+      // clicking into devtools, where no mouse event ever arrives.
+      function onOut(e) {
+        if (!e.relatedTarget) park();
+      }
+
+      // Scrolling slides the page under a still pointer; without this the
+      // dot kept whatever state the last mousemove gave it (grown, with a
+      // link's bar showing) over whatever scrolled in underneath.
+      function recheck() {
+        scrollQueued = false;
+        if (!hasPos || pointerGone) return;
+        var under = document.elementFromPoint(lastX, lastY);
+        if (under) onMove({ clientX: lastX, clientY: lastY, target: under });
+      }
+      function onScroll() {
+        if (scrollQueued) return;
+        scrollQueued = true;
+        requestAnimationFrame(recheck);
+      }
+
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("scroll", onScroll, { passive: true });
+      document.addEventListener("mouseout", onOut);
+      document.addEventListener("mouseleave", park);
+      window.addEventListener("blur", park);
+      window.__cleanup.push(function () {
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("scroll", onScroll);
+        document.removeEventListener("mouseout", onOut);
+        document.removeEventListener("mouseleave", park);
+        window.removeEventListener("blur", park);
+      });
+    })();
+
+    /* ---------- what the dot does to what it covers ----------
+     Every block the dot can cross has a copy of itself in a fixed layer that
+     sits above the dot. The copy is clipped to a circle the size of the dot
+     and pinned over the original, so inside that circle you see the copy --
+     black text, a black bar, a black button face -- and everywhere else the
+     original, untouched.
+
+     The copies live in one layer on the body rather than inside the blocks
+     they duplicate, which is the whole point: a copy inside its block inherits
+     that block's place in the stacking order, and anything with its own
+     stacking context (the hero's button row, a sticky heading) buried the copy
+     under the dot. Out here there is one rule -- this layer is above the dot
+     -- and it holds everywhere.
+
+     The copy's classes are re-read from the original each frame, so a state
+     the cursor script sets on a link (its cobalt bar, a button's active
+     colours) appears inside the circle in the same frame it appears outside. */
+    (function () {
+      var ZOOM =
+        parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            "--page-zoom",
+          ),
+        ) || 1;
+      var blocks = document.querySelectorAll(
+        ".magnetic, .btn-flat, .nav-links a, .lk, .mail, .cert-more",
+      );
+      if (
+        !blocks.length ||
+        matchMedia("(hover:none), (pointer:coarse)").matches
+      )
+        return;
+
+      var dotEl = document.querySelector(".cursor-dot");
+      function dotHidden() {
+        // The inline value the cursor script sets, not the computed one: the
+        // dot fades over 150ms, and reading it mid-fade parks the lens.
+        return pointerGone || !dotEl || dotEl.style.opacity === "0";
+      }
+      function dotRadius() {
+        return dotEl ? dotEl.getBoundingClientRect().width / 2 : 16;
+      }
+
+      var host = document.createElement("div");
+      host.className = "lens-host";
+      host.setAttribute("aria-hidden", "true");
+      document.body.appendChild(host);
+
+      var MATCH = [
+        "display", "boxSizing",
+        "paddingTop", "paddingRight", "paddingBottom", "paddingLeft",
+        "fontFamily", "fontSize", "fontWeight", "fontStyle",
+        "letterSpacing", "wordSpacing", "textTransform", "lineHeight",
+        "whiteSpace", "textAlign",
+      ];
+      var lenses = [];
+      blocks.forEach(function (block) {
+        var lens = block.cloneNode(true);
+        lens.className = block.className + " dot-lens";
+        lens.setAttribute("aria-hidden", "true");
+        // Duplicated ids would be invalid markup.
+        lens.removeAttribute("id");
+        lens.querySelectorAll("[id]").forEach(function (el) {
+          el.removeAttribute("id");
+        });
+        lens.style.position = "fixed";
+        lens.style.margin = "0";
+        lens.style.pointerEvents = "none";
+        lens.style.userSelect = "none";
+        lens.style.clipPath = "circle(0px at -999px -999px)";
+        host.appendChild(lens);
+        lenses.push({ block: block, lens: lens, live: false });
+      });
+
+      var mx = -9999,
+        my = -9999;
+      function park(entry) {
+        if (!entry.live) return;
+        entry.live = false;
+        entry.lens.style.clipPath = "circle(0px at -999px -999px)";
+      }
+      // A copy of a block that has faded away mustn't reappear inside the
+      // dot. Walks ancestors because the opacity that hides it may sit higher.
+      function visibleEnough(el) {
+        var o = 1;
+        for (var node = el; node && node.nodeType === 1; node = node.parentElement) {
+          var v = parseFloat(getComputedStyle(node).opacity);
+          if (!isNaN(v)) o *= v;
+          if (o < 0.35) return false;
+        }
+        return true;
+      }
+      function update() {
+        var r = dotRadius(); // window pixels
+        var hidden = dotHidden();
+        for (var i = 0; i < lenses.length; i++) {
+          var entry = lenses[i];
+          var b = entry.block.getBoundingClientRect();
+          // Nothing to draw unless the dot actually reaches this block.
+          if (
+            hidden ||
+            mx + r < b.left ||
+            mx - r > b.right ||
+            my + r < b.top ||
+            my - r > b.bottom ||
+            !visibleEnough(entry.block)
+          ) {
+            park(entry);
+            continue;
+          }
+          var lens = entry.lens;
+          // Copied each time the copy comes into use (so it follows resizes):
+          // styles the original inherits from its own parents -- the nav's
+          // size, tracking, capitals and padding -- would otherwise be lost
+          // when the copy is moved out here, and its text would sit off the
+          // original's.
+          if (!entry.live) {
+            var cs = getComputedStyle(entry.block);
+            for (var k = 0; k < MATCH.length; k++)
+              lens.style[MATCH[k]] = cs[MATCH[k]];
+          }
+          entry.live = true;
+          // The page is scaled, so a fixed box's own coordinates are the
+          // window's divided by that scale.
+          lens.style.left = b.left / ZOOM + "px";
+          lens.style.top = b.top / ZOOM + "px";
+          lens.style.width = b.width / ZOOM + "px";
+          lens.style.height = b.height / ZOOM + "px";
+          // Whatever state the original is in, the copy is in it too.
+          var want = entry.block.className + " dot-lens";
+          if (lens.className !== want) lens.className = want;
+          lens.style.clipPath =
+            "circle(" +
+            r / ZOOM +
+            "px at " +
+            (mx - b.left) / ZOOM +
+            "px " +
+            (my - b.top) / ZOOM +
+            "px)";
+        }
+      }
+      function onMove(e) {
+        mx = e.clientX;
+        my = e.clientY;
+      }
+      // Driven by its own continuous frame loop rather than by events, unlike
+      // the rest of this page's scripts. The dot's grow-on-hover is a 220ms
+      // CSS transition with no JS tick of its own; an event-triggered update
+      // (mousemove/scroll/resize) draws one frame of it and then freezes --
+      // measured, a single entry onto a button left the clip radius stuck at
+      // 14px while the dot went on growing to 50px, for as long as the
+      // pointer then held still. Every block's own class is cheap to read and
+      // the block count is small, so running this every frame costs nothing
+      // worth gating.
+      var frame = null;
+      function loop() {
+        update();
+        frame = requestAnimationFrame(loop);
+      }
+      window.addEventListener("mousemove", onMove);
+      frame = requestAnimationFrame(loop);
+      window.__cleanup.push(function () {
+        window.removeEventListener("mousemove", onMove);
+        if (frame) cancelAnimationFrame(frame);
+        host.remove();
+      });
+    })();
+  })();
+</script>
