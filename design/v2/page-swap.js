@@ -19,7 +19,7 @@
 
   function currentFile() {
     var f = location.pathname.split("/").pop();
-    return f || "index-attention.html";
+    return f || "index.html";
   }
   var current = currentFile();
   var token = 0; // bumped on every swap; a stale in-flight fetch checks this
@@ -48,7 +48,7 @@
     // The new page's dot starts from its CSS default (opacity 0), and that
     // opacity has a transition on it. Left alone, this synthetic move would
     // fade the dot in over ~150ms — visible as a flicker on pages whose own
-    // script has no instant-jump handling for it (index-attention.html's
+    // script has no instant-jump handling for it (index.html's
     // does, work.html's didn't, which is why only one direction flickered).
     // Suppressing the transition for this one synthetic dispatch makes the
     // dot appear immediately regardless of which page's script runs it.
@@ -164,7 +164,7 @@
     var url = new URL(a.getAttribute("href"), location.href);
     if (url.origin !== location.origin) return;
     e.preventDefault();
-    var file = url.pathname.split("/").pop() || "index-attention.html";
+    var file = url.pathname.split("/").pop() || "index.html";
     if (file === current) return; // already on this page
     current = file;
     swap(url.pathname + url.search, true);
