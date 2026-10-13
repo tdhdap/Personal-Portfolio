@@ -160,7 +160,19 @@
         // Keep the nav that's on screen (its bar is mid-flight) but give it
         // the incoming page's attributes, so each page's own hooks hold.
         var keptNav = document.querySelector(".nav-fixed");
+        var keptLang = document.querySelector(".lang-switch");
         document.body.innerHTML = doc.body.innerHTML;
+        // The language toggle is identical on every page; keeping it lets
+        // its bar finish travelling after a switch.
+        var newLang = document.querySelector(".lang-switch");
+        if (keptLang && newLang) {
+          // Hover state belonged to the outgoing page's cursor script; the
+          // incoming one re-applies it if the pointer is still there.
+          keptLang.querySelectorAll(".is-ringed").forEach(function (el) {
+            el.classList.remove("is-ringed");
+          });
+          newLang.replaceWith(keptLang);
+        }
         var newNav = document.querySelector(".nav-fixed");
         if (keptNav && newNav) {
           var oldLinks = keptNav.querySelectorAll(".nav-links a");
@@ -205,6 +217,11 @@
         location.href = url; // network hiccup: fall back to a real navigation
       });
   }
+
+  // The language toggle (i18n.js) re-renders the page it's on through this.
+  window.__swapTo = function (url) {
+    swap(url, false);
+  };
 
   document.addEventListener("click", function (e) {
     // .nav-fixed links (Home/Work) plus any other internal link opted in via
