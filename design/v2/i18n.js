@@ -32,12 +32,12 @@
     "nav.work": "Projets",
 
     "hero.intro1":
-      "<strong>Je suis en dernière année d’école d’ingénieurs, spécialité IA.</strong> " +
-      "Je développe des applications d’IA full-stack, j’entraîne et j’ajuste des " +
+      "<strong>Je suis en dernière année d’études d’ingénierie en IA.</strong> " +
+      "Je développe des applications d’IA full-stack, j’entraîne et j’affine des " +
       "modèles pour des problèmes concrets, et j’ai une expérience de recherche en " +
       "vision par ordinateur.",
     "hero.intro2":
-      "J’aime apprendre de nouvelles choses, et je recherche des postes en ML " +
+      "J’aime apprendre de nouvelles choses et je recherche des postes en ML " +
       "appliqué et en produits d’IA.",
 
     "sec.experience": "Expérience",
@@ -46,16 +46,16 @@
     "sec.contact": "Écrivez-moi",
 
     "xp.aizen":
-      "Développement d’une application web qui traite des données de natures " +
-      "variées pour classer les changements de version dans des documents de " +
+      "Développement d’une application web qui traite des données de types " +
+      "variés pour classer les changements de version dans des documents de " +
       "spécifications pharmaceutiques. L’outil fournit un raisonnement automatisé " +
       "et une analyse visuelle, permettant aux relecteurs de gérer, modifier et " +
       "évaluer les risques de chaque modification.",
     "xp.enigma":
       "Conception d’un outil de recherche visuel qui transforme des articles " +
-      "académiques complexes en graphes conceptuels interactifs et en résumés, " +
+      "scientifiques complexes en graphes conceptuels interactifs et en résumés, " +
       "pour explorer des notions en profondeur et cartographier leurs relations " +
-      "par une analyse de nœuds au clic.",
+      "en cliquant sur les nœuds du graphe.",
 
     "kit.lang": "Langages",
     "kit.ds": "Science des données et ML",
@@ -79,7 +79,7 @@
       "à partir du jeu de données IBM HR Analytics, pour prévoir les départs " +
       "d’employés et modéliser l’évolution des rémunérations. En combinant la " +
       "probabilité de départ et les projections salariales, le modèle calcule " +
-      "un indicateur de « perte salariale attendue » qui aide les organisations " +
+      "un indicateur de « perte salariale attendue » qui aide les organisations " +
       "à repérer les talents clés à risque et à prioriser leurs actions de " +
       "fidélisation.",
     "work.pde":
@@ -87,7 +87,7 @@
       "filtrer le bruit de Poisson des images numériques, grâce à une " +
       "architecture fondée sur les mathématiques. En remplaçant les convolutions " +
       "denses par des différences finies géométriques, cette approche légère " +
-      "réduit de 97,6 % le nombre de paramètres entraînables et ramène le temps " +
+      "réduit de 97,6 % le nombre de paramètres entraînables et ramène le temps " +
       "d’entraînement de plusieurs heures à quelques minutes, sans artefacts " +
       "visuels et avec une qualité compétitive.",
     "work.agentic":
@@ -101,7 +101,8 @@
       "végétation sur des images satellite Sentinel-2. En combinant des modèles " +
       "pré-entraînés avec la localisation des corridors et des signaux " +
       "bitemporels d’évolution de la végétation, l’outil classe le risque avec " +
-      "une précision élevée (AUC 0,79, F1 0,83) sur des régions inédites. " +
+      "une précision élevée (AUC 0,79, F1 0,83) sur des régions absentes des " +
+      "données d’entraînement. " +
       "L’objectif est d’informer les gestionnaires de lignes électriques et de " +
       "les alerter des dommages que l’empiètement peut causer à leur réseau.",
     "work.ann":
@@ -145,6 +146,8 @@
     DEC: "DÉC.",
   };
   var PLACES = { "Hyderabad, India": "Hyderabad, Inde" };
+  // Date phrases that read better restructured than word-for-word.
+  var DATES = { "Jul – Present": "Depuis juil." };
   var TITLES = { "Work - Tharun": "Projets - Tharun" };
   var ARIA = {
     "Company site": "Site de l’entreprise",
@@ -196,10 +199,15 @@
             return WORDS[s];
           });
       });
-    doc.querySelectorAll(".cert-meta, .xp-span").forEach(function (el) {
-      var t = firstText(el);
-      if (t) swapText(t, months);
-    });
+    doc
+      .querySelectorAll(".cert-meta, .xp-span, .item-year")
+      .forEach(function (el) {
+        var t = firstText(el);
+        if (t)
+          swapText(t, function (s) {
+            return DATES[s] || months(s);
+          });
+      });
     doc.querySelectorAll(".place").forEach(function (el) {
       var t = firstText(el);
       if (t)
@@ -210,7 +218,8 @@
     doc.querySelectorAll(".cert-shot img[alt]").forEach(function (img) {
       if (img.__en === undefined) img.__en = img.alt;
       var m = /^(.*) certificate$/.exec(img.__en);
-      img.alt = lang === "fr" && m ? "Certificat « " + m[1] + " »" : img.__en;
+      img.alt =
+        lang === "fr" && m ? "Certificat « " + m[1] + " »" : img.__en;
     });
     doc.querySelectorAll("[aria-label]").forEach(function (el) {
       if (el.__enLabel === undefined) el.__enLabel = el.getAttribute("aria-label");
