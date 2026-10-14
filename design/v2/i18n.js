@@ -57,6 +57,9 @@
       "pour explorer des notions en profondeur et cartographier leurs relations " +
       "en cliquant sur les nœuds du graphe.",
 
+    "xp.aizen.role": "Stagiaire en projets d’IA",
+    "xp.enigma.role": "Ingénieur IA",
+
     "kit.lang": "Langages",
     "kit.ds": "Science des données et ML",
     "kit.fw": "Frameworks et bibliothèques",
@@ -67,6 +70,15 @@
     "work.title": 'Projets<span class="dot">.</span>',
     "work.sub":
       "Une sélection de projets réalisés dans différents domaines.",
+    "work.backdoor.title":
+      "Prédire le coût de suppression des portes dérobées dans les modèles " +
+      "vision-langage",
+    "work.hr.title": "Analyse RH : prédiction des départs et des salaires",
+    "work.pde.title": "Débruitage d’images léger par EDP",
+    "work.agentic.title": "Outil agentique de refactorisation de code",
+    "work.satellite.title": "Détection des risques par imagerie satellite",
+    "work.ann.title": "Étude comparative des architectures ANN et CNN",
+    "work.auction.title": "Plateforme d’enchères",
     "work.backdoor":
       "Étude visant à déterminer si l’ASR-G permet de prédire le coût de " +
       "suppression des portes dérobées dans les grands modèles vision-langage. " +

@@ -410,10 +410,12 @@
     font-weight: 600;
     letter-spacing: -0.022em;
   }
+  /* Set exactly as the project name beside it. */
   .item-year {
-    font-family: var(--mono);
-    font-size: 13.5px;
-    color: var(--fg-3);
+    font-size: clamp(19px, 1.9vw, 24px);
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    color: var(--fg);
   }
   .item-body {
     margin-top: 12px;
@@ -659,27 +661,39 @@
   }
 
   /* ---------- language toggle ----------
-     The top-left corner, mirroring the nav in the top-right: same height,
-     same type, kept apart from Home/Work. The current language reads white,
-     the other grey; a tap re-renders the page in it. Above the nav's scrim
-     on narrow screens (later in the DOM, same layer). */
+     In the top-right with Home/Work, after a hairline divider so it reads as
+     its own control rather than a third page. Same type and height as the
+     links, so its bar lines up with theirs. The current language reads
+     white, the other grey; a tap re-renders the page in it. */
+  .nav-fixed {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
   .lang-switch {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 2;
-    padding: 26px var(--gut);
+    pointer-events: auto; /* the nav itself lets clicks through */
     display: flex;
     align-items: center;
     gap: 7px;
+    padding-left: 30px;
+    border-left: 1px solid var(--line-2);
     font-size: 12.5px;
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
   @media (max-width: 640px) {
+    .nav-fixed,
     .lang-switch {
+      gap: 22px;
+    }
+    .lang-switch {
+      gap: 7px;
+      padding-left: 22px;
       font-size: 13.5px;
+    }
+    .nav-links {
+      gap: 22px;
     }
   }
   html.i18n-pending main,
@@ -775,12 +789,12 @@
       <a class="nav-link" href="./work.html" aria-current="page" data-i18n="nav.work">Work</a>
     </li>
   </ul>
+  <div class="lang-switch" role="group" aria-label="Language">
+    <button class="lang-btn" type="button" data-lang="en" lang="en" aria-pressed="true">EN</button
+    ><span class="lang-sep" aria-hidden="true">/</span
+    ><button class="lang-btn" type="button" data-lang="fr" lang="fr" aria-pressed="false">FR</button>
+  </div>
 </nav>
-<div class="lang-switch" role="group" aria-label="Language">
-  <button class="lang-btn" type="button" data-lang="en" lang="en" aria-pressed="true">EN</button
-  ><span class="lang-sep" aria-hidden="true">/</span
-  ><button class="lang-btn" type="button" data-lang="fr" lang="fr" aria-pressed="false">FR</button>
-</div>
 
 <main class="shell">
   <section class="head">
@@ -797,7 +811,7 @@
     <article class="item">
       <div>
         <div class="item-top">
-          <h2 class="item-name magnetic">Predicting Backdoor Recovery Cost in Vision-Language Models</h2>
+          <h2 class="item-name magnetic" data-i18n="work.backdoor.title">Predicting Backdoor Recovery Cost in Vision-Language Models</h2>
           <span class="item-year tnum">Aug 2025 – May 2026</span>
         </div>
         <p class="item-body" data-i18n="work.backdoor">
@@ -825,7 +839,7 @@
     <article class="item">
       <div>
         <div class="item-top">
-          <h2 class="item-name magnetic">
+          <h2 class="item-name magnetic" data-i18n="work.hr.title">
             HR Analytics: Attrition & Salary Prediction
           </h2>
           <span class="item-year tnum">May 2025</span>
@@ -850,7 +864,7 @@
     <article class="item">
       <div>
         <div class="item-top">
-          <h2 class="item-name magnetic">Lightweight PDE Image Denoiser</h2>
+          <h2 class="item-name magnetic" data-i18n="work.pde.title">Lightweight PDE Image Denoiser</h2>
           <span class="item-year tnum">Feb – Apr 2026</span>
         </div>
         <p class="item-body" data-i18n="work.pde">
@@ -877,7 +891,7 @@
     <article class="item">
       <div>
         <div class="item-top">
-          <h2 class="item-name magnetic">Agentic Code Refactoring Tool</h2>
+          <h2 class="item-name magnetic" data-i18n="work.agentic.title">Agentic Code Refactoring Tool</h2>
           <span class="item-year tnum">Jun 2025</span>
         </div>
         <p class="item-body" data-i18n="work.agentic">
@@ -900,7 +914,7 @@
     <article class="item">
       <div>
         <div class="item-top">
-          <h2 class="item-name magnetic">
+          <h2 class="item-name magnetic" data-i18n="work.satellite.title">
             Satellite Imagery Risk Detection Pipeline
           </h2>
           <span class="item-year tnum">Apr 2026</span>
@@ -915,7 +929,11 @@
           potential harm to their powerlines caused by encroachment.
         </p>
         <div class="links">
-          <a class="lk" href="#"
+          <a
+            class="lk"
+            href="https://github.com/tdhdap/Power-Line-Corridor-Encroachment-Detection"
+            target="_blank"
+            rel="noopener noreferrer"
             >Code <svg class="icon"><use href="#i-code" /></svg
           ></a>
         </div>
@@ -927,7 +945,7 @@
     <article class="item">
       <div>
         <div class="item-top">
-          <h2 class="item-name magnetic">
+          <h2 class="item-name magnetic" data-i18n="work.ann.title">
             Comparative-Study-ANN-vs-CNN-Architecture
           </h2>
           <span class="item-year tnum">May 2026</span>
@@ -961,7 +979,7 @@
     <article class="item">
       <div>
         <div class="item-top">
-          <h2 class="item-name magnetic">Auction Platform</h2>
+          <h2 class="item-name magnetic" data-i18n="work.auction.title">Auction Platform</h2>
           <span class="item-year tnum">May 2026</span>
         </div>
         <p class="item-body" data-i18n="work.auction">

@@ -165,13 +165,15 @@
         // The language toggle is identical on every page; keeping it lets
         // its bar finish travelling after a switch.
         var newLang = document.querySelector(".lang-switch");
-        if (keptLang && newLang) {
+        if (keptLang) {
           // Hover state belonged to the outgoing page's cursor script; the
           // incoming one re-applies it if the pointer is still there.
           keptLang.querySelectorAll(".is-ringed").forEach(function (el) {
             el.classList.remove("is-ringed");
           });
-          newLang.replaceWith(keptLang);
+          // Inside the nav it's already kept with it, below.
+          if (newLang && !(keptNav && keptNav.contains(keptLang)))
+            newLang.replaceWith(keptLang);
         }
         var newNav = document.querySelector(".nav-fixed");
         if (keptNav && newNav) {
